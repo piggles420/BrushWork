@@ -1166,10 +1166,9 @@
       background: rgba(0, 0, 0, 0.7);
       backdrop-filter: blur(4px);
       z-index: 1000;
-      align-items: center;
+      align-items: stretch;
       justify-content: center;
-      padding: 20px;
-      overflow-y: auto;
+      padding: 0;
     }
 
     .job-hub-modal.open {
@@ -1178,51 +1177,43 @@
 
     .job-hub {
       background: var(--surface);
-      border: 1px solid var(--border-2);
-      border-radius: var(--r-lg);
       width: 100%;
       max-width: 720px;
-      max-height: 95vh;
-      overflow: hidden;
+      margin: 0 auto;
+      height: 100%;
       display: flex;
       flex-direction: column;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+      overflow: hidden;
     }
 
     .job-hub-header {
-      padding: 20px;
-      background: linear-gradient(180deg, var(--surface-2) 0%, var(--surface) 100%);
+      padding: 12px 16px;
+      background: var(--surface-2);
       border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
     }
 
     .job-hub-client {
-      font-size: 20px;
+      font-size: 17px;
       font-weight: 800;
       color: var(--text);
-      margin-bottom: 8px;
+      margin-bottom: 2px;
     }
 
     .job-hub-contact {
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-      font-size: 12px;
-      color: var(--text-2);
-      margin-bottom: 12px;
+      display: none;
     }
 
     .job-hub-stats {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
+      display: flex;
+      gap: 12px;
+      margin-top: 6px;
     }
 
     .job-hub-stat {
-      background: var(--surface-3);
-      border: 1px solid var(--border);
-      border-radius: var(--r-sm);
-      padding: 10px;
-      text-align: center;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
 
     .job-hub-stat-label {
@@ -1230,38 +1221,37 @@
       color: var(--text-3);
       text-transform: uppercase;
       font-weight: 700;
-      letter-spacing: 0.4px;
+      letter-spacing: 0.3px;
     }
 
     .job-hub-stat-value {
-      font-size: 16px;
-      font-weight: 800;
+      font-size: 13px;
+      font-weight: 700;
       color: var(--text);
-      margin-top: 4px;
     }
 
     .job-hub-tabs {
       display: flex;
       gap: 0;
       border-bottom: 1px solid var(--border);
-      overflow-x: auto;
       background: var(--surface);
+      flex-shrink: 0;
     }
 
     .job-hub-tab {
       flex: 1;
-      padding: 12px 14px;
+      padding: 10px 12px;
       background: none;
       border: none;
       border-bottom: 2px solid transparent;
       cursor: pointer;
       color: var(--text-2);
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 700;
       white-space: nowrap;
       transition: all 0.2s;
       text-transform: uppercase;
-      letter-spacing: 0.4px;
+      letter-spacing: 0.3px;
     }
 
     .job-hub-tab:hover {
@@ -1276,7 +1266,9 @@
     .job-hub-content {
       flex: 1;
       overflow-y: auto;
-      padding: 20px;
+      padding: 16px;
+      -webkit-overflow-scrolling: touch;
+      min-height: 0;
     }
 
     .job-hub-section {
@@ -1288,23 +1280,21 @@
     }
 
     .job-hub-footer {
-      padding: 12px 16px;
-      padding-bottom: max(12px, env(safe-area-inset-bottom));
+      padding: 8px 12px;
+      padding-bottom: max(8px, env(safe-area-inset-bottom));
       border-top: 1px solid var(--border);
       display: flex;
-      gap: 8px;
+      gap: 6px;
       justify-content: space-between;
-      flex-wrap: wrap;
       background: var(--surface-2);
-      position: sticky;
-      bottom: 0;
+      flex-shrink: 0;
     }
 
     .job-hub-footer .btn {
       flex: 1;
       min-width: 0;
-      font-size: 12px;
-      padding: 10px 8px;
+      font-size: 11px;
+      padding: 8px 6px;
     }
 
     /* TOOLTIPS & BADGES */
@@ -1575,7 +1565,7 @@
       }
 
       .job-hub-stats {
-        grid-template-columns: 1fr;
+        flex-wrap: wrap;
       }
 
       /* Better touch targets on mobile */
@@ -2460,6 +2450,24 @@ function recalc() {
     }
   });
 
+  // Door & window pricing items also need trim paint
+  const dwDoors = (window.doorPricingItems || []).reduce((s, d) => s + (parseInt(d.qty) || 0), 0);
+  const dwWindows = (window.windowPricingItems || []).reduce((s, w) => s + (parseInt(w.qty) || 0), 0);
+  if (dwDoors > 0) {
+    const dwDoorSqft = dwDoors * DOOR_SQFT * 2;
+    totalDoorSqft += dwDoorSqft;
+    totalDoorGalCoats += (dwDoorSqft * 2) / TRIM_PAINT_SQFT_PER_GALLON;
+    // Door casings
+    const dwCasingSqft = dwDoors * DOOR_CASING_PERIM * DOOR_CASING_WIDTH_FT;
+    totalTrimSqft += dwCasingSqft;
+    totalTrimGalCoats += (dwCasingSqft * 2) / TRIM_PAINT_SQFT_PER_GALLON;
+  }
+  if (dwWindows > 0) {
+    const dwWinSqft = dwWindows * (WINDOW_PERIM * WINDOW_TRIM_WIDTH_FT + WINDOW_JAMB_SQFT);
+    totalTrimSqft += dwWinSqft;
+    totalTrimGalCoats += (dwWinSqft * 2) / TRIM_PAINT_SQFT_PER_GALLON;
+  }
+
   const totalSqft = totalWallSqft + totalCeilSqft;
   const rate = parseFloat(gv('calc_rate')) || 0;
   let total = 0;
@@ -3011,6 +3019,7 @@ function saveAsQuote() {
 
 function autoLogMaterialExpenses(job) {
   const client = job.client || 'Unassigned';
+  const jobName = client + ' — ' + (job.type || 'Job');
   const r = job.calcResults || {};
   const date = new Date().toISOString().slice(0, 10);
 
@@ -3034,10 +3043,12 @@ function autoLogMaterialExpenses(job) {
     DB.expenses.push({
       id: 'exp_' + Date.now() + '_' + type,
       date: date,
-      client: client,
-      category: 'Paint',
+      jobId: job.id,
+      jobName: jobName,
+      category: 'Paint & Supplies',
       amount: total,
-      desc: brand + ' ' + product + ' (' + Math.ceil(gallons) + ' gal) — ' + typeLabel,
+      description: brand + ' ' + product + ' (' + Math.ceil(gallons) + ' gal) — ' + typeLabel,
+      receiptData: null
     });
   });
 
@@ -3046,8 +3057,10 @@ function autoLogMaterialExpenses(job) {
     if (s.desc && s.amount > 0) {
       DB.expenses.push({
         id: 'exp_' + Date.now() + '_s' + Math.random(),
-        date: date, client: client, category: 'Sundries',
-        amount: s.amount, desc: s.desc,
+        date: date, jobId: job.id, jobName: jobName,
+        category: 'Sundries',
+        amount: s.amount, description: s.desc,
+        receiptData: null
       });
     }
   });
@@ -3057,8 +3070,10 @@ function autoLogMaterialExpenses(job) {
     if (s.desc && s.amount > 0) {
       DB.expenses.push({
         id: 'exp_' + Date.now() + '_e' + Math.random(),
-        date: date, client: client, category: s.cat || 'Equipment',
-        amount: s.amount, desc: s.desc,
+        date: date, jobId: job.id, jobName: jobName,
+        category: s.cat || 'Equipment',
+        amount: s.amount, description: s.desc,
+        receiptData: null
       });
     }
   });
@@ -3660,23 +3675,18 @@ function renderJobHub() {
   const j = currentHubJob;
 
   document.getElementById('hub-client').textContent = j.client || 'New Job';
-  document.getElementById('hub-contact').innerHTML = `
-    ${j.address ? '<div>' + esc(j.address) + '</div>' : ''}
-    ${j.phone ? '<div>' + esc(j.phone) + '</div>' : ''}
-    ${j.email ? '<div>' + esc(j.email) + '</div>' : ''}
-  `;
+  document.getElementById('hub-contact').innerHTML = '';
+  const badgeClass = currentHubStage === 'quoted' ? 'quote' : currentHubStage === 'inprogress' ? 'active' : 'done';
+  const stageLabel = currentHubStage === 'quoted' ? 'Quoted' : currentHubStage === 'inprogress' ? 'Active' : 'Completed';
   document.getElementById('hub-stats').innerHTML = `
     <div class="job-hub-stat">
-      <div class="job-hub-stat-label">Price</div>
-      <div class="job-hub-stat-value">$${fmt(j.price || 0)}</div>
+      <span class="job-hub-stat-value" style="font-size:15px;color:var(--quote);">$${fmt(j.price || 0)}</span>
     </div>
     <div class="job-hub-stat">
-      <div class="job-hub-stat-label">Stage</div>
-      <div class="job-hub-stat-value"><span class="badge badge-${currentHubStage === 'quoted' ? 'quote' : currentHubStage === 'inprogress' ? 'active' : 'done'}">${currentHubStage === 'quoted' ? 'Quoted' : currentHubStage === 'inprogress' ? 'Active' : 'Completed'}</span></div>
+      <span class="badge badge-${badgeClass}" style="font-size:10px;padding:3px 8px;">${stageLabel}</span>
     </div>
     <div class="job-hub-stat">
-      <div class="job-hub-stat-label">Date</div>
-      <div class="job-hub-stat-value">${j.date || ''}</div>
+      <span class="job-hub-stat-value" style="font-size:11px;color:var(--text-2);">${j.date || ''}</span>
     </div>
   `;
 
@@ -3715,16 +3725,22 @@ function renderHubJobTab() {
 
   let html = `<div style="padding:4px 0;">`;
 
-  // Job header — price editable
+  // Job header — price editable with QR code
   html += `
-    <div style="text-align:center;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--border);">
-      <div style="display:inline-flex;align-items:baseline;gap:2px;">
-        <span style="font-size:20px;font-weight:800;color:var(--text);">$</span>
-        <input type="number" value="${j.price || 0}" min="0" step="0.01"
-          style="font-size:24px;font-weight:800;color:var(--text);background:transparent;border:none;border-bottom:2px dashed var(--border);text-align:center;width:140px;padding:0 4px;"
-          onchange="currentHubJob.price=parseFloat(this.value)||0;updateHubHeader();">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border);">
+      <div style="flex:1;text-align:center;">
+        <div style="display:inline-flex;align-items:baseline;gap:2px;">
+          <span style="font-size:20px;font-weight:800;color:var(--text);">$</span>
+          <input type="number" value="${j.price || 0}" min="0" step="0.01"
+            style="font-size:24px;font-weight:800;color:var(--text);background:transparent;border:none;border-bottom:2px dashed var(--border);text-align:center;width:140px;padding:0 4px;"
+            onchange="currentHubJob.price=parseFloat(this.value)||0;updateHubHeader();">
+        </div>
+        <div style="font-size:12px;color:var(--text-2);margin-top:4px;">${esc(j.type || 'Painting Job')}</div>
       </div>
-      <div style="font-size:12px;color:var(--text-2);margin-top:4px;">${esc(j.type || 'Painting Job')}</div>
+      <div style="flex-shrink:0;text-align:center;">
+        <div id="job-qr-code" style="display:inline-block;padding:4px;background:#f0ebe4;border-radius:6px;cursor:pointer;" onclick="closeJobHub();showTab('jobs');" title="Go to Jobs board"></div>
+        <div><button class="btn btn-outline" style="font-size:9px;padding:2px 6px;margin-top:3px;" onclick="downloadJobQR('${j.id}','${esc(j.client)}')">Save</button></div>
+      </div>
     </div>
   `;
 
@@ -3846,21 +3862,12 @@ function renderHubJobTab() {
     `;
   }
 
-  // QR Code section
-  html += `
-    <div style="text-align:center;margin-bottom:12px;padding:12px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
-      <div id="job-qr-code" style="display:inline-block;padding:8px;background:#f0ebe4;border-radius:var(--r-sm);"></div>
-      <div style="margin-top:6px;font-size:10px;color:var(--text-3);">Scan to open this job</div>
-      <button class="btn btn-outline btn-sm" style="margin-top:4px;font-size:11px;" onclick="downloadJobQR('${j.id}','${esc(j.client)}')">Save QR</button>
-    </div>
-  `;
-
   html += '</div>';
   content.innerHTML = html;
 
   renderHubRooms();
   renderHubDWPricing();
-  setTimeout(() => generateJobQR('job-qr-code', j.id, 120), 50);
+  setTimeout(() => generateJobQR('job-qr-code', j.id, 64), 50);
 }
 
 function updateHubHeader() {
@@ -4401,7 +4408,7 @@ function removeLaborEntry(i) {
 function renderHubFinancials() {
   const content = document.getElementById('hub-content');
   const j = currentHubJob;
-  const jobExpenses = DB.expenses.filter(e => (e.client || e.job || '').toLowerCase() === (j.client || '').toLowerCase());
+  const jobExpenses = DB.expenses.filter(e => e.jobId === j.id || (!e.jobId && (e.client || e.job || '').toLowerCase() === (j.client || '').toLowerCase()));
   const jobId = j.id;
   const totalExp = jobExpenses.reduce((s, e) => s + (parseFloat(e.amount) || 0), 0);
   const profit = (parseFloat(j.price) || 0) - totalExp;
@@ -4446,15 +4453,15 @@ function renderHubFinancials() {
     </div>
 
     <div style="border-top:1px solid var(--border);padding-top:12px;">
-      <div style="font-size:13px;font-weight:700;margin-bottom:8px;">Photos</div>
+      <div style="font-size:13px;font-weight:700;margin-bottom:8px;">Before & After Photos</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
         <label class="btn btn-outline btn-sm" style="text-align:center;cursor:pointer;font-size:11px;">
           + Before
-          <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="handleJobPhoto(this.files,'${jobId}','before')">
+          <input type="file" accept="image/*" multiple style="display:none;" onchange="handleJobPhoto(this.files,'${jobId}','before')">
         </label>
         <label class="btn btn-outline btn-sm" style="text-align:center;cursor:pointer;font-size:11px;">
           + After
-          <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="handleJobPhoto(this.files,'${jobId}','after')">
+          <input type="file" accept="image/*" multiple style="display:none;" onchange="handleJobPhoto(this.files,'${jobId}','after')">
         </label>
       </div>
       <div id="hub-photos-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"></div>
@@ -4468,7 +4475,7 @@ function renderHubFinancials() {
     document.getElementById('hub-expenses-list').innerHTML = jobExpenses.map(e => `
       <div style="display:flex;justify-content:space-between;padding:8px 10px;border-bottom:1px solid var(--border);font-size:12px;">
         <div>
-          <div style="font-weight:600;">${esc(e.desc)}</div>
+          <div style="font-weight:600;">${esc(e.description || e.desc || 'Expense')}</div>
           <div style="color:var(--text-3);font-size:10px;">${e.category || ''} · ${e.date || ''}</div>
         </div>
         <strong>$${fmt(e.amount)}</strong>
@@ -4533,11 +4540,13 @@ function saveExpense() {
 
   DB.expenses.push({
     id: 'exp_' + Date.now(),
-    client: job,
+    jobId: currentHubJob ? currentHubJob.id : null,
+    jobName: currentHubJob ? (currentHubJob.client + ' — ' + (currentHubJob.type || 'Job')) : job,
     category: category,
-    desc: desc,
+    description: desc,
     amount: amount,
     date: date,
+    receiptData: null
   });
 
   saveDB();
@@ -5519,87 +5528,143 @@ function renderClientsSettings() {
   }).join('');
 }
 
+function getJobNameById(jobId) {
+  if (!jobId) return '';
+  const allJobs = [...DB.quotes, ...DB.inprogress, ...DB.completed];
+  const j = allJobs.find(x => x.id === jobId);
+  return j ? (j.client || 'Unknown') + ' — ' + (j.type || 'Job') : '';
+}
+
+function getJobStageById(jobId) {
+  if (DB.quotes.find(x => x.id === jobId)) return 'quoted';
+  if (DB.inprogress.find(x => x.id === jobId)) return 'inprogress';
+  if (DB.completed.find(x => x.id === jobId)) return 'completed';
+  return null;
+}
+
 function renderExpenseReport() {
   const body = document.getElementById('settings-body');
   if (!DB.expenses) DB.expenses = [];
-
   const expenses = DB.expenses;
-  const totalExpenses = expenses.reduce((s, e) => s + (parseFloat(e.amount) || 0), 0);
+  const totalExp = expenses.reduce((s, e) => s + (parseFloat(e.amount) || 0), 0);
 
-  // Category breakdown
-  const byCategory = {};
+  // Tax categories mapping
+  const taxCategories = {
+    'Materials & Supplies': ['Paint & Supplies', 'Paint', 'Sundries', 'Supplies'],
+    'Equipment & Tools': ['Equipment', 'Tools'],
+    'Vehicle & Travel': ['Travel', 'Vehicle', 'Gas', 'Mileage'],
+    'Subcontractor': ['Subcontractor', 'Labor'],
+    'Other': ['Other']
+  };
+
+  // Group by tax category
+  const byTaxCat = {};
   expenses.forEach(e => {
     const cat = e.category || 'Other';
-    byCategory[cat] = (byCategory[cat] || 0) + (parseFloat(e.amount) || 0);
+    let taxCat = 'Other';
+    for (const [tc, cats] of Object.entries(taxCategories)) {
+      if (cats.some(c => cat.toLowerCase().includes(c.toLowerCase()))) { taxCat = tc; break; }
+    }
+    if (!byTaxCat[taxCat]) byTaxCat[taxCat] = { total: 0, count: 0, items: [] };
+    byTaxCat[taxCat].total += parseFloat(e.amount) || 0;
+    byTaxCat[taxCat].count++;
+    byTaxCat[taxCat].items.push(e);
   });
+
+  // Group by job
+  const byJob = {};
+  expenses.forEach(e => {
+    const key = e.jobId || '_none';
+    if (!byJob[key]) byJob[key] = { name: e.jobId ? getJobNameById(e.jobId) : 'Unassigned', total: 0, items: [], receipts: 0 };
+    byJob[key].total += parseFloat(e.amount) || 0;
+    byJob[key].items.push(e);
+    if (e.receiptData) byJob[key].receipts++;
+  });
+
+  const year = new Date().getFullYear();
 
   let html = `
     <div style="padding:0;">
+      <!-- Add Expense Button -->
       <button class="btn btn-primary btn-full" style="margin-bottom:14px;" onclick="addNewExpense()">+ Add Expense</button>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
-        <div style="background:var(--danger-dim);border:1px solid var(--danger);border-radius:var(--r-sm);padding:14px;text-align:center;">
-          <div style="font-size:22px;font-weight:800;color:var(--danger);">$${fmt(totalExpenses)}</div>
-          <div style="font-size:11px;color:var(--text-2);">Total Expenses</div>
+      <!-- Tax Year Summary -->
+      <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-sm);padding:14px;margin-bottom:14px;">
+        <div style="font-size:12px;font-weight:700;margin-bottom:10px;color:var(--text);">Tax Year ${year}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+          <div style="padding:10px;background:var(--danger-dim);border-radius:var(--r-sm);text-align:center;">
+            <div style="font-size:18px;font-weight:800;color:var(--danger);">$${fmt(totalExp)}</div>
+            <div style="font-size:10px;color:var(--text-3);">Deductible Expenses</div>
+          </div>
+          <div style="padding:10px;background:var(--surface-3);border-radius:var(--r-sm);text-align:center;">
+            <div style="font-size:18px;font-weight:800;color:var(--text);">${expenses.length}</div>
+            <div style="font-size:10px;color:var(--text-3);">Total Entries</div>
+          </div>
         </div>
-        <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-sm);padding:14px;text-align:center;">
-          <div style="font-size:22px;font-weight:800;color:var(--text);">${expenses.length}</div>
-          <div style="font-size:11px;color:var(--text-2);">Expense Count</div>
-        </div>
-      </div>
-
-      ${Object.keys(byCategory).length ? `
-      <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px;margin-bottom:14px;">
-        <div style="font-size:12px;font-weight:700;margin-bottom:8px;color:var(--text-2);">By Category</div>
+        <div style="font-size:10px;font-weight:600;color:var(--text-2);margin-bottom:6px;">By Tax Category:</div>
         <div style="display:grid;gap:4px;">
-          ${Object.entries(byCategory).map(([cat, amt]) => `
-            <div style="display:flex;justify-content:space-between;font-size:11px;padding:4px 0;">
-              <span>${cat}</span>
-              <span style="font-weight:700;">$${fmt(amt)}</span>
+          ${Object.entries(byTaxCat).map(([cat, data]) => `
+            <div style="display:flex;justify-content:space-between;align-items:center;font-size:10px;padding:6px;background:var(--surface);border-radius:var(--r-sm);">
+              <span>${esc(cat)}</span>
+              <span style="font-weight:700;">$${fmt(data.total)}</span>
             </div>
           `).join('')}
         </div>
       </div>
-      ` : ''}
 
-      <div style="font-size:12px;font-weight:700;margin-bottom:10px;color:var(--text-2);">Expense List</div>
-      ${!expenses.length ? `
-        <div style="padding:20px;text-align:center;color:var(--text-3);">No expenses recorded</div>
-      ` : `
-        <div id="expenses-list" style="display:grid;gap:8px;"></div>
-      `}
+      <!-- By Job Section -->
+      <div style="margin-bottom:14px;">
+        <div style="font-size:12px;font-weight:700;margin-bottom:8px;color:var(--text);">Expenses by Job</div>
+        ${Object.entries(byJob).map(([key, jobData]) => {
+          const stage = key !== '_none' ? getJobStageById(key) : null;
+          const isCollapsed = key !== '_none'; // Start jobs collapsed
+          return `
+            <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-sm);margin-bottom:8px;overflow:hidden;">
+              <div style="display:flex;align-items:center;padding:10px;cursor:pointer;background:var(--surface-3);border-bottom:1px solid var(--border);" onclick="toggleHubSection('job-exp-${key}')">
+                <span id="job-exp-${key}-arrow" style="color:var(--text-3);font-size:11px;margin-right:8px;">▼</span>
+                <span style="flex:1;font-weight:600;font-size:11px;${stage ? 'cursor:pointer;text-decoration:underline;color:var(--active);' : ''}" ${stage ? `onclick="event.stopPropagation();closeSettings();openJobHub('${stage}','${key}')"` : ''}>${esc(jobData.name)}</span>
+                <span style="font-weight:700;font-size:11px;margin-right:8px;">$${fmt(jobData.total)}</span>
+                <span style="font-size:10px;color:var(--text-3);">${jobData.receipts} receipt${jobData.receipts !== 1 ? 's' : ''}</span>
+              </div>
+              <div id="job-exp-${key}" style="display:${isCollapsed ? 'none' : 'block'};padding:8px;">
+                ${jobData.items.map(e => `
+                  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:8px;margin-bottom:6px;font-size:10px;">
+                    <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:4px;">
+                      <div style="flex:1;">
+                        <div style="font-weight:600;color:var(--text);">${esc(e.description || 'Unnamed')}</div>
+                        <div style="color:var(--text-3);margin-top:2px;">${e.date} · ${esc(e.category || 'Other')}</div>
+                      </div>
+                      <div style="font-weight:700;color:var(--quote);margin-left:8px;">$${fmt(e.amount)}</div>
+                    </div>
+                    ${e.receiptData ? `<img src="${e.receiptData}" style="width:100%;height:60px;object-fit:cover;border-radius:4px;margin-bottom:4px;cursor:pointer;" onclick="viewExpenseReceipt('${e.id}')">` : ''}
+                    <div style="display:flex;gap:4px;">
+                      <button class="btn btn-outline btn-sm" style="flex:1;font-size:9px;padding:3px 4px;" onclick="editExpense('${e.id}')">Edit</button>
+                      <button class="btn btn-outline btn-sm" style="flex:1;font-size:9px;padding:3px 4px;color:var(--danger);" onclick="deleteExpense('${e.id}')">Delete</button>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+
+      <!-- Receipt Library -->
+      <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px;margin-bottom:14px;">
+        <div style="font-size:12px;font-weight:700;margin-bottom:8px;color:var(--text);">Receipt Library</div>
+        <div id="expense-receipt-gallery" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;max-height:200px;overflow-y:auto;"></div>
+        ${!expenses.some(e => e.receiptData) ? `<div style="padding:12px;text-align:center;color:var(--text-3);font-size:11px;">No receipts uploaded yet</div>` : ''}
+      </div>
+
+      <!-- Export Note -->
+      <div style="background:var(--surface-3);border:1px solid var(--border-2);border-radius:var(--r-sm);padding:10px;font-size:10px;color:var(--text-2);">
+        <span style="font-weight:600;">💾 Export:</span> All expense data can be exported in the Data tab for accounting software integration.
+      </div>
     </div>
   `;
 
   body.innerHTML = html;
-
-  if (expenses.length) {
-    renderExpenseList();
-  }
-}
-
-function renderExpenseList() {
-  const list = document.getElementById('expenses-list');
-  if (!list) return;
-
-  list.innerHTML = (DB.expenses || []).map(e => `
-    <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px;display:grid;gap:6px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;">
-        <div style="flex:1;">
-          <div style="font-weight:700;font-size:12px;">${esc(e.description || 'Unnamed')}</div>
-          <div style="font-size:10px;color:var(--text-3);">${e.date || ''} · ${e.category || 'Other'}</div>
-        </div>
-        <div style="text-align:right;">
-          <div style="font-weight:700;font-size:13px;">$${fmt(e.amount || 0)}</div>
-          ${e.jobId ? `<div style="font-size:9px;color:var(--text-3);">Job: ${e.jobId}</div>` : ''}
-        </div>
-      </div>
-      <div style="display:flex;gap:4px;">
-        <button class="btn btn-outline btn-xs" style="flex:1;font-size:9px;" onclick="editExpense('${e.id}')">Edit</button>
-        <button class="btn btn-outline btn-xs" style="flex:1;font-size:9px;" onclick="deleteExpense('${e.id}')">Delete</button>
-      </div>
-    </div>
-  `).join('');
+  loadExpenseReceipts();
 }
 
 function addNewExpense() {
@@ -5609,7 +5674,9 @@ function addNewExpense() {
     category: 'Supplies',
     description: '',
     amount: 0,
-    jobId: null
+    jobId: null,
+    jobName: '',
+    receiptData: null
   };
   if (!DB.expenses) DB.expenses = [];
   DB.expenses.unshift(expense);
@@ -5622,38 +5689,55 @@ function editExpense(id) {
   const expense = (DB.expenses || []).find(e => e.id === id);
   if (!expense) return;
 
-  const jobOptions = [...DB.quotes, ...DB.inprogress, ...DB.completed]
-    .map(j => `<option value="${j.id}" ${expense.jobId === j.id ? 'selected' : ''}>${esc(j.client)} - ${esc(j.type)}</option>`)
+  const allJobs = [...DB.quotes, ...DB.inprogress, ...DB.completed];
+  const jobOptions = allJobs
+    .map(j => `<option value="${j.id}" ${expense.jobId === j.id ? 'selected' : ''}>${esc(j.client)} — ${esc(j.type || 'Job')} ($${fmt(j.price||0)})</option>`)
     .join('');
 
   const modal = document.createElement('div');
   modal.id = 'expense-modal';
-  modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:9998;';
+  modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:9998;padding:16px;';
   modal.innerHTML = `
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px;max-width:400px;width:90%;">
-      <div style="font-size:14px;font-weight:700;margin-bottom:14px;">Edit Expense</div>
-      <div class="form-group" style="margin-bottom:10px;">
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;max-width:400px;width:100%;max-height:90vh;overflow-y:auto;">
+      <div style="font-size:14px;font-weight:700;margin-bottom:12px;">Edit Expense</div>
+      <div class="form-group" style="margin-bottom:8px;">
+        <label>Associated Job</label>
+        <select id="exp_edit_job" onchange="var e=DB.expenses.find(x=>x.id==='${id}');e.jobId=this.value||null;e.jobName=this.options[this.selectedIndex].text;" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--surface-3);color:var(--text);">
+          <option value="">No job (general expense)</option>
+          ${jobOptions}
+        </select>
+      </div>
+      <div class="form-group" style="margin-bottom:8px;">
         <label>Date</label>
         <input type="date" value="${expense.date}" onchange="DB.expenses.find(e=>e.id==='${id}').date=this.value" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--surface-3);color:var(--text);">
       </div>
-      <div class="form-group" style="margin-bottom:10px;">
+      <div class="form-group" style="margin-bottom:8px;">
         <label>Category</label>
-        <input type="text" value="${esc(expense.category)}" placeholder="Supplies, Labor, Equipment, etc." onchange="DB.expenses.find(e=>e.id==='${id}').category=this.value" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--surface-3);color:var(--text);">
+        <select onchange="DB.expenses.find(e=>e.id==='${id}').category=this.value" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--surface-3);color:var(--text);">
+          <option ${expense.category==='Paint & Supplies' ? 'selected' : ''}>Paint & Supplies</option>
+          <option ${expense.category==='Sundries' ? 'selected' : ''}>Sundries</option>
+          <option ${expense.category==='Equipment' ? 'selected' : ''}>Equipment</option>
+          <option ${expense.category==='Labor' ? 'selected' : ''}>Labor</option>
+          <option ${expense.category==='Travel' ? 'selected' : ''}>Travel</option>
+          <option ${expense.category==='Subcontractor' ? 'selected' : ''}>Subcontractor</option>
+          <option ${expense.category==='Other' ? 'selected' : ''}>Other</option>
+        </select>
       </div>
-      <div class="form-group" style="margin-bottom:10px;">
+      <div class="form-group" style="margin-bottom:8px;">
         <label>Description</label>
-        <input type="text" value="${esc(expense.description)}" placeholder="Item details" onchange="DB.expenses.find(e=>e.id==='${id}').description=this.value" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--surface-3);color:var(--text);">
+        <input type="text" value="${esc(expense.description || expense.desc || '')}" placeholder="What was purchased?" onchange="DB.expenses.find(e=>e.id==='${id}').description=this.value" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--surface-3);color:var(--text);">
       </div>
-      <div class="form-group" style="margin-bottom:10px;">
+      <div class="form-group" style="margin-bottom:8px;">
         <label>Amount ($)</label>
         <input type="number" value="${expense.amount || 0}" min="0" step="0.01" onchange="DB.expenses.find(e=>e.id==='${id}').amount=parseFloat(this.value)||0" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--surface-3);color:var(--text);">
       </div>
-      <div class="form-group" style="margin-bottom:14px;">
-        <label>Associated Job (optional)</label>
-        <select onchange="DB.expenses.find(e=>e.id==='${id}').jobId=this.value||null" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--surface-3);color:var(--text);">
-          <option value="">None</option>
-          ${jobOptions}
-        </select>
+      <div class="form-group" style="margin-bottom:12px;">
+        <label>Receipt Image</label>
+        <label style="display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;border:2px dashed var(--border-2);border-radius:var(--r-sm);cursor:pointer;color:var(--text-2);font-size:11px;">
+          📎 Upload receipt
+          <input type="file" accept="image/*,.pdf" style="display:none;" onchange="attachReceiptInModal('${id}',this.files)">
+        </label>
+        ${expense.receiptData ? `<img src="${expense.receiptData}" style="width:100%;max-height:100px;object-fit:cover;border-radius:var(--r-sm);margin-top:6px;border:1px solid var(--border);">` : ''}
       </div>
       <div style="display:flex;gap:6px;">
         <button class="btn btn-primary" style="flex:1;" onclick="saveDB();closeExpenseModal();renderExpenseReport()">Save</button>
@@ -5663,6 +5747,118 @@ function editExpense(id) {
   `;
   modal.onclick = (e) => { if (e.target.id === 'expense-modal') closeExpenseModal(); };
   document.body.appendChild(modal);
+}
+
+function attachReceiptInModal(expId, files) {
+  if (!files || !files.length) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const exp = (DB.expenses || []).find(x => x.id === expId);
+    if (exp) {
+      exp.receiptData = e.target.result;
+      saveDB();
+      showToast('Receipt attached');
+    }
+  };
+  reader.readAsDataURL(files[0]);
+}
+
+function uploadReceiptForExpense(expId, files) {
+  if (!files || !files.length) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const exp = (DB.expenses || []).find(x => x.id === expId);
+    if (exp) {
+      exp.receiptData = e.target.result;
+      saveDB();
+      showToast('Receipt attached');
+      renderExpenseList();
+    }
+  };
+  reader.readAsDataURL(files[0]);
+}
+
+function uploadExpenseReceipt(files) {
+  if (!files || !files.length) return;
+  // Create a new expense with the receipt
+  const expense = {
+    id: 'exp_' + Date.now(),
+    date: new Date().toISOString().split('T')[0],
+    category: 'Other',
+    description: files[0].name || 'Receipt upload',
+    amount: 0,
+    jobId: null,
+    jobName: '',
+    receiptData: null
+  };
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    expense.receiptData = e.target.result;
+    if (!DB.expenses) DB.expenses = [];
+    DB.expenses.unshift(expense);
+    saveDB();
+    showToast('Receipt uploaded — edit to add details');
+    renderExpenseReport();
+    editExpense(expense.id);
+  };
+  reader.readAsDataURL(files[0]);
+}
+
+function loadExpenseReceipts() {
+  const gallery = document.getElementById('expense-receipt-gallery');
+  if (!gallery) return;
+  const withReceipts = (DB.expenses || []).filter(e => e.receiptData);
+  if (!withReceipts.length) { gallery.innerHTML = ''; return; }
+  gallery.innerHTML = `
+    <div style="display:flex;gap:6px;flex-wrap:wrap;">
+      ${withReceipts.slice(0, 8).map(e => `
+        <div style="position:relative;width:60px;height:60px;border-radius:var(--r-sm);overflow:hidden;border:1px solid var(--border);cursor:pointer;" onclick="viewExpenseReceipt('${e.id}')">
+          <img src="${e.receiptData}" style="width:100%;height:100%;object-fit:cover;">
+        </div>
+      `).join('')}
+      ${withReceipts.length > 8 ? `<div style="width:60px;height:60px;display:flex;align-items:center;justify-content:center;background:var(--surface-3);border-radius:var(--r-sm);font-size:11px;color:var(--text-3);">+${withReceipts.length - 8}</div>` : ''}
+    </div>
+  `;
+}
+
+function viewExpenseReceipt(expId) {
+  const exp = (DB.expenses || []).find(e => e.id === expId);
+  if (!exp || !exp.receiptData) return;
+  viewReceiptFull(exp.receiptData);
+}
+
+function viewReceiptFull(src) {
+  const modal = document.createElement('div');
+  modal.id = 'receipt-view-modal';
+  modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px;cursor:pointer;';
+  const img = document.createElement('img');
+  img.src = src;
+  img.style.cssText = 'max-width:100%;max-height:90vh;object-fit:contain;border-radius:14px;';
+  modal.appendChild(img);
+  modal.onclick = () => modal.remove();
+  document.body.appendChild(modal);
+}
+
+function viewPhoto(photoId) {
+  // Get the photo from IndexedDB and display it full-screen
+  getPhotoById(photoId).then(photo => {
+    if (photo && photo.imageData) {
+      viewReceiptFull(photo.imageData);
+    }
+  }).catch(() => showToast('Could not load photo'));
+}
+
+function getPhotoById(photoId) {
+  return new Promise((resolve) => {
+    const db = indexedDB.open('brushwork_db', 1);
+    db.onsuccess = (e) => {
+      const objStore = e.target.result.transaction(['photos']).objectStore('photos');
+      const req = objStore.get(photoId);
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => resolve(null);
+    };
+    db.onerror = () => resolve(null);
+  });
 }
 
 function closeExpenseModal() {
@@ -5729,6 +5925,11 @@ function openClientProfile(clientId) {
       const stageLabel = stage === 'quoted' ? 'Quoted' : stage === 'inprogress' ? 'Active' : 'Completed';
       const roomCount = j.rooms ? Object.keys(j.rooms).length : 0;
 
+      // Calculate job expenses
+      const jobExpenses = (DB.expenses || []).filter(e => e.jobId === j.id);
+      const jobExpTotal = jobExpenses.reduce((s, e) => s + (parseFloat(e.amount) || 0), 0);
+      const receiptCount = jobExpenses.filter(e => e.receiptData).length;
+
       html += `
         <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px;margin-bottom:8px;">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
@@ -5740,6 +5941,7 @@ function openClientProfile(clientId) {
             ${j.date || ''}${roomCount ? ' · ' + roomCount + ' room' + (roomCount > 1 ? 's' : '') : ''}
             ${j.desc ? ' · ' + esc(j.desc) : ''}
           </div>
+          ${jobExpTotal > 0 ? `<div style="font-size:10px;color:var(--text-3);margin-bottom:8px;">Expenses: $${fmt(jobExpTotal)} · ${receiptCount} receipt${receiptCount !== 1 ? 's' : ''}</div>` : ''}
           <div style="display:flex;gap:6px;flex-wrap:wrap;">
             <button class="btn btn-outline btn-sm" style="font-size:11px;" onclick="openJobSummary('${stage}','${j.id}')">Job Summary</button>
             <button class="btn btn-outline btn-sm" style="font-size:11px;" onclick="clientPrintDoc('${j.id}','${stage}','estimate')">Estimate</button>
