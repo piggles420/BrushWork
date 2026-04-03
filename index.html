@@ -62,18 +62,18 @@
 
     /* HEADER */
     .app-header {
-      background: linear-gradient(180deg, var(--surface) 0%, rgba(17,22,39,0.8) 100%);
-      padding: 14px 18px;
+      background: var(--surface);
+      padding: 10px 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-bottom: 1px solid var(--border-2);
+      border-bottom: 1px solid var(--border);
       position: sticky;
       top: 0;
       z-index: 100;
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
-      gap: 16px;
+      gap: 12px;
     }
 
     .app-header-left {
@@ -84,16 +84,15 @@
     }
 
     .app-logo {
-      width: 40px;
-      height: 40px;
+      width: 34px;
+      height: 34px;
       background: linear-gradient(135deg, #d4845a, #e8a924);
       border-radius: var(--r-sm);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 22px;
+      font-size: 18px;
       flex-shrink: 0;
-      box-shadow: 0 4px 16px rgba(212,132,90,0.2);
     }
 
     .app-header-content {
@@ -160,74 +159,116 @@
 
     /* CALCULATOR TAB */
     .calc-container {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
       padding-bottom: 110px;
     }
 
-    .accordion-section {
-      margin-bottom: 12px;
+    /* Step progress indicator */
+    .calc-steps {
+      display: flex;
+      gap: 2px;
+      margin-bottom: 20px;
+      background: var(--surface-2);
+      border-radius: var(--r);
+      overflow: hidden;
+      border: 1px solid var(--border);
     }
 
-    .accordion-header {
-      width: 100%;
+    .calc-step {
+      flex: 1;
+      text-align: center;
+      padding: 10px 6px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-3);
       background: var(--surface-2);
-      border: 1px solid var(--border);
-      border-radius: var(--r);
-      padding: 14px 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .calc-step.active {
+      color: var(--quote);
+      background: var(--quote-dim);
+    }
+
+    .calc-step.filled {
+      color: var(--done);
+      background: var(--done-dim);
+    }
+
+    .calc-step::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: transparent;
+      transition: background 0.2s;
+    }
+
+    .calc-step.active::after {
+      background: var(--quote);
+    }
+
+    .calc-step.filled::after {
+      background: var(--done);
+    }
+
+    /* Flat sections */
+    .calc-section {
+      padding: 20px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .calc-section:last-of-type {
+      border-bottom: none;
+    }
+
+    .calc-section-head {
       display: flex;
       align-items: center;
-      gap: 12px;
-      cursor: pointer;
-      font-size: 15px;
-      font-weight: 700;
-      color: var(--text);
-      transition: all 0.2s;
-      text-align: left;
+      gap: 10px;
+      margin-bottom: 16px;
     }
 
-    .accordion-header:hover {
+    .calc-section-num {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
       background: var(--surface-3);
-      border-color: var(--border-2);
-    }
-
-    .accordion-header:active {
-      transform: scale(0.98);
-    }
-
-    .accordion-icon {
-      display: inline-flex;
+      border: 1.5px solid var(--border-2);
+      display: flex;
       align-items: center;
       justify-content: center;
-      width: 20px;
-      height: 20px;
       font-size: 12px;
-      color: var(--text-2);
-      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      font-weight: 800;
+      color: var(--text-3);
       flex-shrink: 0;
     }
 
-    .accordion-section.open .accordion-icon {
-      transform: rotate(90deg);
+    .calc-section.has-data .calc-section-num {
+      background: var(--done-dim);
+      border-color: var(--done);
+      color: var(--done);
     }
 
-    .accordion-body {
-      max-height: 0;
-      overflow: hidden;
-      opacity: 0;
-      transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s;
+    .calc-section-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.2px;
     }
 
-    .accordion-body.open {
-      max-height: 5000px;
-      opacity: 1;
-      padding: 16px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-top: none;
-      border-radius: 0 0 var(--r) var(--r);
-      margin-top: -1px;
+    .calc-section-sub {
+      font-size: 11px;
+      color: var(--text-3);
+      font-weight: 500;
     }
 
     /* ROOM CARD */
@@ -432,20 +473,20 @@
       margin-bottom: 12px;
     }
 
-    /* FLOATING BAR — compact */
+    /* FLOATING BAR */
     .calc-floating-bar {
       position: fixed;
-      bottom: 68px;
-      left: 12px;
-      right: 12px;
+      bottom: 56px;
+      left: 10px;
+      right: 10px;
       max-width: 1200px;
       margin: 0 auto;
-      background: linear-gradient(135deg, #1a1508, #2a1f10);
-      border: 1px solid rgba(232,169,36,0.3);
+      background: var(--surface);
+      border: 1px solid var(--quote-dim);
       border-radius: var(--r);
-      padding: 8px 12px;
+      padding: 8px 14px;
       z-index: 50;
-      box-shadow: 0 -4px 24px rgba(0,0,0,0.5), 0 0 20px var(--quote-glow);
+      box-shadow: 0 -2px 16px rgba(0,0,0,0.4), 0 0 12px var(--quote-dim);
     }
 
     .floating-bar-content {
@@ -497,163 +538,6 @@
     }
 
     /* SUMMARY PANEL — slides up from floating bar */
-    .summary-panel {
-      display: none;
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      top: 0;
-      background: rgba(0,0,0,0.7);
-      backdrop-filter: blur(4px);
-      z-index: 200;
-    }
-
-    .summary-panel.open {
-      display: flex;
-      align-items: flex-end;
-    }
-
-    .summary-sheet {
-      width: 100%;
-      max-width: 720px;
-      margin: 0 auto;
-      max-height: 85vh;
-      background: var(--surface);
-      border-radius: var(--r-lg) var(--r-lg) 0 0;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      animation: slideUp 0.25s ease;
-    }
-
-    @keyframes slideUp {
-      from { transform: translateY(100%); }
-      to { transform: translateY(0); }
-    }
-
-    .summary-sheet-header {
-      padding: 16px 18px 12px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: var(--surface-2);
-    }
-
-    .summary-sheet-header h3 {
-      font-size: 16px;
-      font-weight: 800;
-      color: var(--text);
-    }
-
-    .summary-sheet-tabs {
-      display: flex;
-      border-bottom: 1px solid var(--border);
-      background: var(--surface);
-    }
-
-    .summary-sheet-tab {
-      flex: 1;
-      padding: 10px 12px;
-      background: none;
-      border: none;
-      border-bottom: 2px solid transparent;
-      color: var(--text-3);
-      font-size: 12px;
-      font-weight: 700;
-      cursor: pointer;
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
-    }
-
-    .summary-sheet-tab.active {
-      color: var(--quote);
-      border-bottom-color: var(--quote);
-    }
-
-    .summary-sheet-body {
-      flex: 1;
-      overflow-y: auto;
-      padding: 16px 18px 20px;
-    }
-
-    .summary-sheet-footer {
-      padding: 12px 18px;
-      padding-bottom: max(12px, env(safe-area-inset-bottom));
-      border-top: 1px solid var(--border);
-      display: flex;
-      gap: 8px;
-      background: var(--surface-2);
-    }
-
-    .summary-sheet-footer .btn {
-      flex: 1;
-    }
-
-    /* Summary content styles */
-    .sum-row {
-      display: flex;
-      justify-content: space-between;
-      padding: 8px 0;
-      border-bottom: 1px solid var(--border);
-      font-size: 13px;
-    }
-
-    .sum-row:last-child { border-bottom: none; }
-
-    .sum-row-label { color: var(--text-2); }
-    .sum-row-value { font-weight: 700; color: var(--text); }
-
-    .sum-total {
-      display: flex;
-      justify-content: space-between;
-      padding: 12px 0 4px;
-      margin-top: 8px;
-      border-top: 2px solid var(--quote);
-      font-size: 16px;
-      font-weight: 800;
-    }
-
-    .sum-section-title {
-      font-size: 12px;
-      font-weight: 800;
-      color: var(--text-3);
-      text-transform: uppercase;
-      letter-spacing: 0.4px;
-      margin: 16px 0 8px;
-    }
-
-    .sum-section-title:first-child { margin-top: 0; }
-
-    .mat-card {
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      border-radius: var(--r-sm);
-      padding: 10px 12px;
-      margin-bottom: 8px;
-    }
-
-    .mat-card-title {
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--text);
-      margin-bottom: 4px;
-    }
-
-    .mat-card-detail {
-      font-size: 11px;
-      color: var(--text-3);
-      line-height: 1.5;
-    }
-
-    .mat-card-amount {
-      font-size: 14px;
-      font-weight: 800;
-      color: var(--quote);
-      margin-top: 4px;
-    }
-
     /* KANBAN BOARD */
     .kanban-board {
       display: grid;
@@ -1502,47 +1386,54 @@
       background: var(--surface);
       border-top: 1px solid var(--border-2);
       display: flex;
-      justify-content: space-around;
+      justify-content: center;
+      gap: 4px;
       z-index: 200;
-      padding-bottom: env(safe-area-inset-bottom, 0);
-      box-shadow: 0 -4px 20px rgba(0,0,0,0.3);
+      padding: 6px 12px;
+      padding-bottom: calc(6px + env(safe-area-inset-bottom, 0));
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
     }
 
     .bnav-btn {
-      flex: 1;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 4px;
+      gap: 6px;
       border: none;
       background: none;
       cursor: pointer;
-      padding: 10px 8px;
+      padding: 8px 16px;
       color: var(--text-3);
-      transition: color 0.2s;
+      transition: all 0.2s;
       -webkit-tap-highlight-color: transparent;
       font-size: 13px;
-      font-weight: 700;
+      font-weight: 600;
+      border-radius: 10px;
     }
 
     .bnav-icon {
-      font-size: 24px;
+      font-size: 18px;
       line-height: 1;
     }
 
     .bnav-label {
-      font-size: 10px;
-      text-transform: uppercase;
-      letter-spacing: 0.4px;
+      font-size: 12px;
+      font-weight: 700;
+      display: none;
     }
 
     .bnav-btn.active {
       color: var(--quote);
+      background: var(--quote-dim);
+    }
+
+    .bnav-btn.active .bnav-label {
+      display: block;
     }
 
     .bnav-btn.active .bnav-icon {
-      filter: drop-shadow(0 0 6px var(--quote-glow));
+      filter: drop-shadow(0 0 4px var(--quote-glow));
     }
 
     /* INVOICE EDITOR */
@@ -1697,9 +1588,12 @@
         min-height: 44px;
       }
 
-      .accordion-header {
-        min-height: 50px;
-        padding: 14px 16px;
+      .calc-steps {
+        font-size: 9px;
+      }
+
+      .dw-grid {
+        grid-template-columns: 1fr !important;
       }
 
       /* Job hub tabs scroll horizontally */
@@ -1742,138 +1636,144 @@
   <div id="tab-content-calculator" class="tab-content active">
     <!-- CALCULATOR TAB -->
     <div class="calc-container">
-      <!-- Client & Job Info -->
-      <div class="accordion-section open">
-        <div class="accordion-header" onclick="toggleAccordion(this)">
-          <span class="accordion-icon">❯</span>
-          <span>👤 Client & Job Info</span>
+      <!-- Step indicators -->
+      <div class="calc-steps" id="calc-steps">
+        <div class="calc-step active" onclick="scrollToCalcSection(0)">Client</div>
+        <div class="calc-step" onclick="scrollToCalcSection(1)">Rooms</div>
+        <div class="calc-step" onclick="scrollToCalcSection(2)">Doors/Win</div>
+        <div class="calc-step" onclick="scrollToCalcSection(3)">Materials</div>
+      </div>
+
+      <!-- 1. Client & Job Info -->
+      <div class="calc-section" id="calc-sec-0" data-section="client">
+        <div class="calc-section-head">
+          <div class="calc-section-num">1</div>
+          <div>
+            <div class="calc-section-title">Client & Job Info</div>
+            <div class="calc-section-sub">Who's the job for?</div>
+          </div>
         </div>
-        <div class="accordion-body open">
-          <div class="form-row cols-2">
-            <div class="form-group">
-              <label>Client Name</label>
-              <input type="text" id="calc_client" placeholder="Enter client name">
-            </div>
-            <div class="form-group">
-              <label>Phone</label>
-              <input type="tel" id="calc_phone" placeholder="(555) 000-0000">
-            </div>
+        <div class="form-row cols-2">
+          <div class="form-group">
+            <label>Client Name</label>
+            <input type="text" id="calc_client" placeholder="Enter client name" oninput="updateCalcSteps()">
           </div>
           <div class="form-group">
-            <label>Email</label>
-            <input type="email" id="calc_email" placeholder="client@example.com">
+            <label>Phone</label>
+            <input type="tel" id="calc_phone" placeholder="(555) 000-0000">
           </div>
-          <div class="form-group">
-            <label>Job Type</label>
-            <div class="job-type-chips" id="calc_jobtype_chips">
-              <label class="chip-option"><input type="checkbox" value="Interior Walls" checked><span>Interior Walls</span></label>
-              <label class="chip-option"><input type="checkbox" value="Exterior"><span>Exterior</span></label>
-              <label class="chip-option"><input type="checkbox" value="Ceilings"><span>Ceilings</span></label>
-              <label class="chip-option"><input type="checkbox" value="Trim & Baseboards"><span>Trim & Baseboards</span></label>
-              <label class="chip-option"><input type="checkbox" value="Doors"><span>Doors</span></label>
-              <label class="chip-option"><input type="checkbox" value="Windows"><span>Windows</span></label>
-              <label class="chip-option"><input type="checkbox" value="Cabinets"><span>Cabinets</span></label>
-              <label class="chip-option"><input type="checkbox" value="Deck / Fence"><span>Deck / Fence</span></label>
-            </div>
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="calc_email" placeholder="client@example.com">
+        </div>
+        <div class="form-group">
+          <label>Job Type</label>
+          <div class="job-type-chips" id="calc_jobtype_chips">
+            <label class="chip-option"><input type="checkbox" value="Interior Walls" checked><span>Interior Walls</span></label>
+            <label class="chip-option"><input type="checkbox" value="Exterior"><span>Exterior</span></label>
+            <label class="chip-option"><input type="checkbox" value="Ceilings"><span>Ceilings</span></label>
+            <label class="chip-option"><input type="checkbox" value="Trim & Baseboards"><span>Trim & Baseboards</span></label>
+            <label class="chip-option"><input type="checkbox" value="Doors"><span>Doors</span></label>
+            <label class="chip-option"><input type="checkbox" value="Windows"><span>Windows</span></label>
+            <label class="chip-option"><input type="checkbox" value="Cabinets"><span>Cabinets</span></label>
+            <label class="chip-option"><input type="checkbox" value="Deck / Fence"><span>Deck / Fence</span></label>
           </div>
-          <div class="form-group">
-            <label>Address</label>
-            <input type="text" id="calc_address" placeholder="123 Main St, City, State 12345">
-          </div>
+        </div>
+        <div class="form-group">
+          <label>Address</label>
+          <input type="text" id="calc_address" placeholder="123 Main St, City, State 12345">
         </div>
       </div>
 
-      <!-- Rooms & Dimensions -->
-      <div class="accordion-section">
-        <div class="accordion-header" onclick="toggleAccordion(this)">
-          <span class="accordion-icon">❯</span>
-          <span>📐 Rooms & Dimensions</span>
-        </div>
-        <div class="accordion-body">
-          <!-- Price mode at top -->
-          <div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border);">
-            <span style="font-size:12px;font-weight:700;color:var(--text-2);">PRICING:</span>
-            <div class="price-toggle">
-              <button class="active" onclick="setPriceMode('sqft')">Per Sq Ft</button>
-              <button onclick="setPriceMode('flat')">Flat Rate</button>
-            </div>
-            <div style="flex:1;">
-              <input type="number" id="calc_rate" placeholder="0.00" min="0" step="0.01" oninput="recalc()"
-                style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--surface-2);color:var(--text);font-size:13px;">
-            </div>
+      <!-- 2. Rooms & Dimensions -->
+      <div class="calc-section" id="calc-sec-1" data-section="rooms">
+        <div class="calc-section-head">
+          <div class="calc-section-num">2</div>
+          <div>
+            <div class="calc-section-title">Rooms & Dimensions</div>
+            <div class="calc-section-sub">Measure it, price it</div>
           </div>
-
-          <!-- Room presets -->
-          <div class="room-presets">
-            <span style="font-size:11px;font-weight:700;color:var(--text-3);margin-right:6px;">QUICK ADD:</span>
-            <button class="preset-btn" onclick="addRoomRow('Closet',6,4,8,1,0)">Closet</button>
-            <button class="preset-btn" onclick="addRoomRow('Bedroom',12,12,8,1,2)">Bedroom</button>
-            <button class="preset-btn" onclick="addRoomRow('Master Bedroom',16,14,9,1,3)">Master</button>
-            <button class="preset-btn" onclick="addRoomRow('Living Room',18,16,9,1,3)">Living Room</button>
-            <button class="preset-btn" onclick="addRoomRow('Bathroom',8,6,8,1,1)">Bathroom</button>
-            <button class="preset-btn" onclick="addRoomRow('Kitchen',14,12,9,1,2)">Kitchen</button>
-            <button class="preset-btn" onclick="addRoomRow('',0,0,8,1,1)">+ Custom</button>
-          </div>
-
-          <!-- Room cards -->
-          <div id="rooms-list"></div>
-
-          <!-- Summary -->
-          <div id="calc-summary" style="margin-top:14px;padding:12px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-sm);font-size:12px;"></div>
         </div>
+
+        <!-- Pricing row -->
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;padding:10px 12px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-sm);">
+          <span style="font-size:11px;font-weight:700;color:var(--text-3);white-space:nowrap;">PRICING</span>
+          <div class="price-toggle">
+            <button class="active" onclick="setPriceMode('sqft')">Per Sq Ft</button>
+            <button onclick="setPriceMode('flat')">Flat Rate</button>
+          </div>
+          <div style="flex:1;max-width:120px;">
+            <input type="number" id="calc_rate" placeholder="$ / sqft" min="0" step="0.01" oninput="recalc()"
+              style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--surface-3);color:var(--text);font-size:13px;font-weight:600;">
+          </div>
+        </div>
+
+        <!-- Quick add presets -->
+        <div class="room-presets">
+          <button class="preset-btn" onclick="addRoomRow('Closet',6,4,8,1,0)">Closet</button>
+          <button class="preset-btn" onclick="addRoomRow('Bedroom',12,12,8,1,2)">Bedroom</button>
+          <button class="preset-btn" onclick="addRoomRow('Master Bedroom',16,14,9,1,3)">Master</button>
+          <button class="preset-btn" onclick="addRoomRow('Living Room',18,16,9,1,3)">Living</button>
+          <button class="preset-btn" onclick="addRoomRow('Bathroom',8,6,8,1,1)">Bath</button>
+          <button class="preset-btn" onclick="addRoomRow('Kitchen',14,12,9,1,2)">Kitchen</button>
+          <button class="preset-btn" onclick="addRoomRow('',0,0,8,1,1)" style="background:var(--primary-dim);border-color:var(--primary);color:var(--primary);">+ Custom</button>
+        </div>
+
+        <div id="rooms-list"></div>
+
+        <!-- Live summary -->
+        <div id="calc-summary" style="margin-top:14px;padding:12px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-sm);font-size:12px;"></div>
       </div>
 
-<!-- Door & Window Pricing -->
-      <div class="accordion-section">
-        <div class="accordion-header" onclick="toggleAccordion(this)">
-          <span class="accordion-icon">❯</span>
-          <span>🚪 Door & Window Pricing</span>
+      <!-- 3. Door & Window Pricing -->
+      <div class="calc-section" id="calc-sec-2" data-section="dw">
+        <div class="calc-section-head">
+          <div class="calc-section-num">3</div>
+          <div>
+            <div class="calc-section-title">Doors & Windows</div>
+            <div class="calc-section-sub">Line-item extras added to quote</div>
+          </div>
         </div>
-        <div class="accordion-body">
-          <div style="font-size:13px;font-weight:700;margin-bottom:6px;color:var(--text);">🚪 Doors</div>
-          <p style="font-size:11px;color:var(--text-3);margin-bottom:10px;">Price per door — painting, casing, and jambs. Adds to quote total.</p>
-          <div id="door-pricing-list"></div>
-          <button class="btn btn-outline btn-sm" onclick="addDoorPricingRow()">+ Add Door Line</button>
 
-          <div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--border);">
-            <div style="font-size:13px;font-weight:700;margin-bottom:6px;color:var(--text);">🪟 Windows</div>
-            <p style="font-size:11px;color:var(--text-3);margin-bottom:10px;">Elaborate windows — caulk, fill, and paint. Adds to quote total.</p>
+        <div class="dw-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div>
+            <div style="font-size:12px;font-weight:700;margin-bottom:8px;color:var(--text-2);">DOORS</div>
+            <div id="door-pricing-list"></div>
+            <button class="btn btn-outline btn-sm" onclick="addDoorPricingRow()" style="width:100%;margin-top:4px;">+ Door</button>
+          </div>
+          <div>
+            <div style="font-size:12px;font-weight:700;margin-bottom:8px;color:var(--text-2);">WINDOWS</div>
             <div id="window-pricing-list"></div>
-            <button class="btn btn-outline btn-sm" onclick="addWindowPricingRow()">+ Add Window Line</button>
+            <button class="btn btn-outline btn-sm" onclick="addWindowPricingRow()" style="width:100%;margin-top:4px;">+ Window</button>
           </div>
-
-          <div id="dw-pricing-total" style="margin-top:14px;padding:10px;background:var(--surface-3);border:1px solid var(--border);border-radius:var(--r-sm);font-size:13px;display:none;"></div>
         </div>
+
+        <div id="dw-pricing-total" style="margin-top:14px;padding:10px;background:var(--surface-3);border:1px solid var(--border);border-radius:var(--r-sm);font-size:13px;display:none;"></div>
       </div>
 
-<!-- Materials & Expenses -->
-      <div class="accordion-section">
-        <div class="accordion-header" onclick="toggleAccordion(this)">
-          <span class="accordion-icon">❯</span>
-          <span>📦 Materials & Expenses</span>
+      <!-- 4. Materials -->
+      <div class="calc-section" id="calc-sec-3" data-section="materials">
+        <div class="calc-section-head">
+          <div class="calc-section-num">4</div>
+          <div>
+            <div class="calc-section-title">Materials & Supplies</div>
+            <div class="calc-section-sub">Paint, sundries, equipment</div>
+          </div>
         </div>
-        <div class="accordion-body">
-          <div id="materials-display"></div>
 
-          <!-- Sundry / Misc Expenses -->
-          <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border);">
-            <div style="font-size:13px;font-weight:700;margin-bottom:10px;color:var(--text);">🧹 Sundries & Job Supplies</div>
-            <div id="sundry-list"></div>
-            <button class="btn btn-outline btn-sm" onclick="addSundryRow()">+ Add Sundry Item</button>
-          </div>
+        <div id="materials-display"></div>
 
-          <!-- Large Equipment / Write-offs -->
-          <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border);">
-            <div style="font-size:13px;font-weight:700;margin-bottom:10px;color:var(--text);">🔧 Equipment & Write-offs</div>
-            <p style="font-size:11px;color:var(--text-3);margin-bottom:10px;">Tools, sprayers, vehicles — larger purchases for tax write-offs</p>
-            <div id="equipment-list"></div>
-            <button class="btn btn-outline btn-sm" onclick="addEquipmentRow()">+ Add Equipment</button>
-          </div>
+        <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border);">
+          <div style="font-size:12px;font-weight:700;margin-bottom:8px;color:var(--text-2);">SUNDRIES & SUPPLIES</div>
+          <div id="sundry-list"></div>
+          <button class="btn btn-outline btn-sm" onclick="addSundryRow()">+ Add Item</button>
+        </div>
 
-          <!-- Log All Button -->
-          <button class="btn btn-primary btn-sm btn-full" style="margin-top:16px;" onclick="logAllMaterialExpenses()">
-            💰 Log All to Expense Report
-          </button>
+        <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border);">
+          <div style="font-size:12px;font-weight:700;margin-bottom:8px;color:var(--text-2);">EQUIPMENT & WRITE-OFFS</div>
+          <div id="equipment-list"></div>
+          <button class="btn btn-outline btn-sm" onclick="addEquipmentRow()">+ Add Equipment</button>
         </div>
       </div>
     </div>
@@ -1881,34 +1781,14 @@
     <!-- FLOATING BAR -->
     <div class="calc-floating-bar">
       <div class="floating-bar-content">
-        <div class="floating-bar-quote" onclick="openSummaryPanel()">
-          <span class="floating-bar-label">Total</span>
+        <div class="floating-bar-quote">
+          <span class="floating-bar-label">Quote Total</span>
           <span class="floating-bar-value" id="floating-res-selected">$0.00</span>
-          <span class="floating-bar-expand">▲ Review</span>
         </div>
         <div class="floating-bar-actions">
-          <button class="btn btn-outline btn-sm" onclick="clearCalculator()">Clear</button>
-          <button class="btn btn-primary btn-sm" onclick="saveAsQuote()">Save</button>
+          <button class="btn btn-outline btn-sm" onclick="clearCalculator()" style="opacity:0.7;">Clear</button>
+          <button class="btn btn-primary btn-sm" onclick="saveAsQuote()" style="font-weight:700;">Save Quote</button>
         </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- SUMMARY PANEL -->
-  <div id="summary-panel" class="summary-panel" onclick="if(event.target===this)closeSummaryPanel()">
-    <div class="summary-sheet">
-      <div class="summary-sheet-header">
-        <h3 id="summary-title">Job Summary</h3>
-        <button class="btn btn-outline btn-sm" onclick="closeSummaryPanel()" style="padding:6px 12px;font-size:12px;">✕</button>
-      </div>
-      <div class="summary-sheet-tabs">
-        <button class="summary-sheet-tab active" onclick="switchSummaryTab('estimate',this)">Estimate</button>
-        <button class="summary-sheet-tab" onclick="switchSummaryTab('materials',this)">Materials</button>
-      </div>
-      <div class="summary-sheet-body" id="summary-body"></div>
-      <div class="summary-sheet-footer">
-        <button class="btn btn-outline btn-sm" onclick="closeSummaryPanel()">Back</button>
-        <button class="btn btn-primary btn-sm" onclick="closeSummaryPanel();saveAsQuote()">Save as Quote</button>
       </div>
     </div>
   </div>
@@ -1963,7 +1843,6 @@
         <button class="btn btn-success btn-sm" onclick="moveHubJobToNextStage()">Next →</button>
         <button class="btn btn-danger btn-sm" onclick="deleteHubJob()">🗑</button>
         <button class="btn btn-primary btn-sm" onclick="saveHubChanges()">💾 Save</button>
-        <button class="btn btn-outline btn-sm" onclick="returnToCalculator()" id="hub-btn-return" style="display:none;">↩ Edit in Calculator</button>
       </div>
     </div>
   </div>
@@ -2118,10 +1997,6 @@ function esc(s) {
 
 function fmt(n) {
   return (parseFloat(n) || 0).toFixed(2);
-}
-
-function cap(s) {
-  return s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
 }
 
 function gv(id) {
@@ -2319,11 +2194,27 @@ function showTab(name) {
 // CALCULATOR
 // ============================================================
 
-function toggleAccordion(btn) {
-  const section = btn.closest('.accordion-section');
-  if (section) section.classList.toggle('open');
-  const body = section.querySelector('.accordion-body');
-  if (body) body.classList.toggle('open');
+function scrollToCalcSection(idx) {
+  const el = document.getElementById('calc-sec-' + idx);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function updateCalcSteps() {
+  const steps = document.querySelectorAll('.calc-step');
+  if (!steps.length) return;
+  // Check which sections have data
+  const hasClient = (gv('calc_client') || '').trim().length > 0;
+  const hasRooms = window.rooms && Object.keys(window.rooms).length > 0;
+  const hasDW = (window.doorPricingRows && window.doorPricingRows.length) || (window.windowPricingRows && window.windowPricingRows.length);
+  const hasMats = document.getElementById('materials-display') && document.getElementById('materials-display').innerHTML.trim().length > 0;
+  const filled = [hasClient, hasRooms, hasDW, hasMats];
+  steps.forEach((s, i) => {
+    s.classList.toggle('filled', !!filled[i]);
+  });
+  // Update section number badges
+  document.querySelectorAll('.calc-section').forEach((sec, i) => {
+    sec.classList.toggle('has-data', !!filled[i]);
+  });
 }
 
 function addRoomRow(name, l, w, h, doors, windows) {
@@ -2592,6 +2483,7 @@ function recalc() {
 
   updateCalcSummary();
   updateMaterialsDisplay();
+  updateCalcSteps();
 }
 
 function updateCalcSummary() {
@@ -2632,7 +2524,11 @@ function setPriceMode(mode) {
   recalc();
 }
 
-function clearCalculator() {
+function clearCalculator(skipConfirm) {
+  if (!skipConfirm) {
+    const hasData = (window.rooms && Object.keys(window.rooms).length) || gv('calc_client').trim();
+    if (hasData && !confirm('Clear all calculator data? This cannot be undone.')) return;
+  }
   window.rooms = {};
   window.sundryItems = [];
   window.equipmentItems = [];
@@ -2763,165 +2659,6 @@ function renderWindowPricing() {
   updateDWPricingTotal();
 }
 
-// ============================================================
-// SUMMARY PANEL
-// ============================================================
-
-function openSummaryPanel() {
-  const panel = document.getElementById('summary-panel');
-  renderSummaryEstimate();
-  panel.classList.add('open');
-}
-
-function closeSummaryPanel() {
-  document.getElementById('summary-panel').classList.remove('open');
-}
-
-function switchSummaryTab(tab, btn) {
-  document.querySelectorAll('.summary-sheet-tab').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  if (tab === 'estimate') renderSummaryEstimate();
-  else renderSummaryMaterials();
-}
-
-function renderSummaryEstimate() {
-  const body = document.getElementById('summary-body');
-  const client = gv('calc_client').trim() || 'No client';
-  const address = gv('calc_address').trim();
-  const phone = gv('calc_phone').trim();
-  const r = window.calcResults || {};
-  const rooms = window.rooms || {};
-  const roomEntries = Object.values(rooms);
-  const jobTypes = getSelectedJobTypes();
-  const doorTotal = getDoorPricingTotal();
-  const winTotal = getWindowPricingTotal();
-  const totalDoors = (window.doorPricingItems || []).reduce((s, d) => s + (d.qty || 0), 0);
-  const totalWins = (window.windowPricingItems || []).reduce((s, d) => s + (d.qty || 0), 0);
-
-  document.getElementById('summary-title').textContent = client;
-
-  let html = '';
-
-  // Client info
-  html += '<div class="sum-section-title">Client</div>';
-  html += '<div class="sum-row"><span class="sum-row-label">Name</span><span class="sum-row-value">' + esc(client) + '</span></div>';
-  if (phone) html += '<div class="sum-row"><span class="sum-row-label">Phone</span><span class="sum-row-value">' + esc(phone) + '</span></div>';
-  if (address) html += '<div class="sum-row"><span class="sum-row-label">Address</span><span class="sum-row-value">' + esc(address) + '</span></div>';
-  if (jobTypes.length) html += '<div class="sum-row"><span class="sum-row-label">Type</span><span class="sum-row-value">' + esc(jobTypes.join(', ')) + '</span></div>';
-
-  // Rooms
-  if (roomEntries.length) {
-    html += '<div class="sum-section-title">Rooms (' + roomEntries.length + ')</div>';
-    roomEntries.forEach(rm => {
-      const ws = Math.max(0, 2*((rm.l||0)+(rm.w||0))*(rm.h||0)-(rm.doors||0)*21-(rm.windows||0)*15);
-      const opts = [];
-      if (rm.includeCeiling) opts.push('Ceiling');
-      if (rm.includePrimer) opts.push('Primer');
-      if (rm.includeTrim) opts.push('Trim');
-      if (rm.paintDoors) opts.push('Doors');
-      html += '<div class="sum-row"><span class="sum-row-label">' + esc(rm.name || 'Room') + ' <span style="color:var(--text-3);font-size:11px;">' + rm.l + '×' + rm.w + '×' + rm.h + '</span></span><span class="sum-row-value">' + ws.toFixed(0) + ' ft²' + (opts.length ? ' · <span style="font-size:11px;color:var(--text-3);font-weight:500;">' + opts.join(', ') + '</span>' : '') + '</span></div>';
-    });
-  }
-
-  // Door & Window pricing
-  if (totalDoors > 0 || totalWins > 0) {
-    html += '<div class="sum-section-title">Door & Window Pricing</div>';
-    window.doorPricingItems.forEach(d => {
-      if (d.qty > 0) html += '<div class="sum-row"><span class="sum-row-label">🚪 ' + esc(d.desc) + ' × ' + d.qty + '</span><span class="sum-row-value">$' + fmt(d.qty * d.price) + '</span></div>';
-    });
-    window.windowPricingItems.forEach(d => {
-      if (d.qty > 0) html += '<div class="sum-row"><span class="sum-row-label">🪟 ' + esc(d.desc) + ' × ' + d.qty + '</span><span class="sum-row-value">$' + fmt(d.qty * d.price) + '</span></div>';
-    });
-  }
-
-  // Price breakdown
-  html += '<div class="sum-section-title">Pricing</div>';
-  const wallCeilTotal = r.totalSqft ? (priceMode === 'sqft' ? r.totalSqft * (parseFloat(gv('calc_rate'))||0) : (parseFloat(gv('calc_rate'))||0)) : 0;
-  const primerAdd = (r.totalPrimerSqft > 0 && priceMode === 'sqft') ? r.totalPrimerSqft * (parseFloat(gv('calc_rate'))||0) * 0.60 : 0;
-
-  html += '<div class="sum-row"><span class="sum-row-label">Walls & Ceilings' + (priceMode === 'sqft' ? ' (' + fmt(r.totalSqft||0) + ' ft²)' : '') + '</span><span class="sum-row-value">$' + fmt(wallCeilTotal) + '</span></div>';
-  if (primerAdd > 0) html += '<div class="sum-row"><span class="sum-row-label">Primer surcharge (60%)</span><span class="sum-row-value">$' + fmt(primerAdd) + '</span></div>';
-  if (doorTotal > 0) html += '<div class="sum-row"><span class="sum-row-label">Doors (' + totalDoors + ')</span><span class="sum-row-value">$' + fmt(doorTotal) + '</span></div>';
-  if (winTotal > 0) html += '<div class="sum-row"><span class="sum-row-label">Windows (' + totalWins + ')</span><span class="sum-row-value">$' + fmt(winTotal) + '</span></div>';
-
-  const grandTotal = wallCeilTotal + primerAdd + doorTotal + winTotal;
-  html += '<div class="sum-total"><span>Quote Total</span><span style="color:var(--done);">$' + fmt(grandTotal) + '</span></div>';
-
-  body.innerHTML = html;
-}
-
-function renderSummaryMaterials() {
-  const body = document.getElementById('summary-body');
-  const r = window.calcResults || {};
-  const rooms = window.rooms || {};
-  const roomEntries = Object.values(rooms);
-
-  let html = '';
-
-  // Wall paint
-  if (r.totalWallSqft > 0) {
-    html += '<div class="mat-card"><div class="mat-card-title">🎨 Wall Paint</div>';
-    html += '<div class="mat-card-detail">' + fmt(r.totalWallSqft) + ' sq ft · ' + (roomEntries[0]?.wallCoats || 2) + ' coats</div>';
-    html += '<div class="mat-card-amount">' + r.totalWallGalCoats + ' gallons</div></div>';
-  }
-
-  // Ceiling paint
-  if (r.hasCeilings && r.totalCeilSqft > 0) {
-    html += '<div class="mat-card"><div class="mat-card-title">⬜ Ceiling Paint</div>';
-    html += '<div class="mat-card-detail">' + fmt(r.totalCeilSqft) + ' sq ft · ' + (roomEntries.find(rm=>rm.includeCeiling)?.ceilCoats || 2) + ' coats</div>';
-    html += '<div class="mat-card-amount">' + r.totalCeilGalCoats + ' gallons</div></div>';
-  }
-
-  // Primer
-  if (r.hasPrimer && r.totalPrimerSqft > 0) {
-    html += '<div class="mat-card"><div class="mat-card-title">🪣 Primer</div>';
-    html += '<div class="mat-card-detail">' + fmt(r.totalPrimerSqft) + ' sq ft · ' + (roomEntries.find(rm=>rm.includePrimer)?.primerCoats || 1) + ' coat(s)</div>';
-    html += '<div class="mat-card-amount">' + r.totalPrimerGalCoats + ' gallons</div></div>';
-  }
-
-  // Trim paint
-  if (r.hasTrim && r.totalTrimSqft > 0) {
-    html += '<div class="mat-card"><div class="mat-card-title">📏 Trim Paint</div>';
-    html += '<div class="mat-card-detail">' + fmt(r.totalTrimSqft) + ' sq ft (' + fmt(r.totalTrimLinearFt) + ' lin ft baseboard at 4" profile)</div>';
-    html += '<div class="mat-card-amount">' + r.totalTrimGalCoats + ' gallons</div></div>';
-  }
-
-  // Door paint
-  if (r.hasDoors && r.totalDoorSqft > 0) {
-    const totalDoors = roomEntries.reduce((sum, rm) => sum + (parseInt(rm.doors)||0) + (parseInt(rm.extraDoors)||0), 0);
-    html += '<div class="mat-card"><div class="mat-card-title">🚪 Door Paint</div>';
-    html += '<div class="mat-card-detail">' + totalDoors + ' door(s) · both sides · ' + fmt(r.totalDoorSqft) + ' sq ft</div>';
-    html += '<div class="mat-card-amount">' + r.totalDoorGalCoats + ' gallons</div></div>';
-  }
-
-  // Door primer
-  if (r.hasDoorPrime && r.totalDoorPrimeSqft > 0) {
-    html += '<div class="mat-card"><div class="mat-card-title">🪣 Door Primer</div>';
-    html += '<div class="mat-card-detail">' + fmt(r.totalDoorPrimeSqft) + ' sq ft</div>';
-    html += '<div class="mat-card-amount">' + r.totalDoorPrimeGalCoats + ' gallons</div></div>';
-  }
-
-  // Combined trim + door total
-  if ((r.hasTrim || r.hasDoors) && r.totalTrimAndDoorGalCoats > 0) {
-    html += '<div style="margin-top:8px;padding:10px 12px;background:var(--accent-dim);border:1px solid rgba(192,132,252,0.2);border-radius:var(--r-sm);">';
-    html += '<div style="font-size:12px;font-weight:700;color:var(--accent);">Combined Trim + Door Paint</div>';
-    html += '<div style="font-size:16px;font-weight:800;color:var(--text);margin-top:2px;">' + r.totalTrimAndDoorGalCoats + ' gallons total</div></div>';
-  }
-
-  // Sundries
-  const sundries = window.sundryItems || [];
-  if (sundries.length && sundries.some(s => s.desc)) {
-    html += '<div class="sum-section-title" style="margin-top:20px;">Sundries & Supplies</div>';
-    sundries.forEach(s => {
-      if (s.desc) html += '<div class="sum-row"><span class="sum-row-label">' + esc(s.desc) + '</span><span class="sum-row-value">' + (s.amount > 0 ? '$' + fmt(s.amount) : '-') + '</span></div>';
-    });
-  }
-
-  if (!html) html = '<div style="padding:30px;text-align:center;color:var(--text-3);">Add rooms to see materials breakdown</div>';
-
-  body.innerHTML = html;
-}
-
 function updateMaterialsDisplay() {
   const el = document.getElementById('materials-display');
   if (!el) return;
@@ -3031,6 +2768,14 @@ function updateMaterialsDisplay() {
     html = '<div style="padding:16px;text-align:center;color:var(--text-3);font-size:12px;">Add rooms above to see material options</div>';
   }
 
+  // Save current brand/product selections before wiping HTML
+  const savedSelections = {};
+  ['wall','ceil','primer','trim'].forEach(type => {
+    const brandEl = document.getElementById('mat_' + type + '_brand');
+    const prodEl = document.getElementById('mat_' + type + '_product');
+    if (brandEl && brandEl.value) savedSelections[type] = { brand: brandEl.value, product: prodEl ? prodEl.value : '' };
+  });
+
   el.innerHTML = html;
 
   ['wall','ceil','primer','trim'].forEach(type => {
@@ -3039,6 +2784,16 @@ function updateMaterialsDisplay() {
       Object.keys(PAINT_DB).forEach(brand => {
         brandSel.innerHTML += `<option value="${brand}">${esc(brand)}</option>`;
       });
+      // Restore saved selection
+      if (savedSelections[type]) {
+        brandSel.value = savedSelections[type].brand;
+        updateMatBrand(type);
+        const prodSel = document.getElementById('mat_' + type + '_product');
+        if (prodSel && savedSelections[type].product) {
+          prodSel.value = savedSelections[type].product;
+          updateMatProduct(type);
+        }
+      }
     }
   });
 }
@@ -3161,80 +2916,6 @@ function renderEquipmentList() {
   `).join('');
 }
 
-function logAllMaterialExpenses() {
-  const client = gv('calc_client').trim() || 'Unassigned';
-  const r = window.calcResults || {};
-  let logged = 0;
-
-  ['wall','ceil','primer','trim'].forEach(type => {
-    const brand = gv('mat_' + type + '_brand');
-    const product = gv('mat_' + type + '_product');
-    if (!brand || !product || !PAINT_DB[brand] || !PAINT_DB[brand][product]) return;
-
-    let gallons = 0;
-    if (type === 'wall') gallons = r.totalWallGalCoats || 0;
-    else if (type === 'ceil') gallons = r.totalCeilGalCoats || 0;
-    else if (type === 'primer') gallons = r.totalPrimerGalCoats || 0;
-    else if (type === 'trim') gallons = r.totalTrimAndDoorGalCoats || ((r.totalTrimGalCoats || 0) + (r.totalDoorGalCoats || 0));
-
-    const cost = PAINT_DB[brand][product].cost;
-    const total = Math.ceil(gallons) * cost;
-
-    const typeLabel = type === 'wall' ? 'Walls' : type === 'ceil' ? 'Ceiling' : type === 'primer' ? 'Primer' : 'Trim & Doors';
-
-    DB.expenses.push({
-      id: Date.now() + Math.random(),
-      date: new Date().toISOString().slice(0, 10),
-      client: client,
-      category: 'Paint',
-      amount: total,
-      desc: `${brand} ${product} (${Math.ceil(gallons)} gal) — ${typeLabel}`,
-      receipt: '',
-      notes: ''
-    });
-    logged++;
-  });
-
-  window.sundryItems.forEach(s => {
-    if (s.desc && s.amount > 0) {
-      DB.expenses.push({
-        id: Date.now() + Math.random(),
-        date: new Date().toISOString().slice(0, 10),
-        client: client,
-        category: 'Sundries',
-        amount: s.amount,
-        desc: s.desc,
-        receipt: '',
-        notes: ''
-      });
-      logged++;
-    }
-  });
-
-  window.equipmentItems.forEach(s => {
-    if (s.desc && s.amount > 0) {
-      DB.expenses.push({
-        id: Date.now() + Math.random(),
-        date: new Date().toISOString().slice(0, 10),
-        client: client,
-        category: s.cat || 'Equipment',
-        amount: s.amount,
-        desc: s.desc,
-        receipt: '',
-        notes: 'Tax write-off'
-      });
-      logged++;
-    }
-  });
-
-  if (logged === 0) {
-    showToast('No materials or expenses to log');
-    return;
-  }
-
-  saveDB();
-  showToast(logged + ' expense(s) logged!');
-}
 
 function saveAsQuote() {
   const client = gv('calc_client').trim();
@@ -3249,14 +2930,10 @@ function saveAsQuote() {
 
   const total = parseFloat(document.getElementById('floating-res-selected').textContent.replace('$', '').replace(/,/g, '')) || 0;
 
-  // Determine if this is a re-save from an existing job
-  const returnStage = window.returnedFromStage || 'quoted';
-  const returnId = window.returnedFromJobId || null;
-
   DB.invoiceCounter = (DB.invoiceCounter || 1000) + 1;
   const quote = {
-    id: returnId || ('q_' + Date.now()),
-    stage: returnStage,
+    id: 'q_' + Date.now(),
+    stage: 'quoted',
     client: client,
     phone: gv('calc_phone'),
     email: gv('calc_email'),
@@ -3275,25 +2952,16 @@ function saveAsQuote() {
     jobTypes: getSelectedJobTypes(),
   };
 
-  // Save to the correct stage
-  if (returnStage === 'inprogress') DB.inprogress.push(quote);
-  else if (returnStage === 'completed') DB.completed.push(quote);
-  else DB.quotes.push(quote);
+  DB.quotes.push(quote);
 
   // Auto-log material expenses keyed to this job
   autoLogMaterialExpenses(quote);
 
   autoUpsertClient(quote.client, quote.phone, quote.email, quote.address);
   saveDB();
+  showToast('Saved as quote!');
 
-  const stageLabel = returnStage === 'inprogress' ? 'active job' : returnStage === 'completed' ? 'completed job' : 'quote';
-  showToast('Saved as ' + stageLabel + '!');
-
-  // Clear return state
-  window.returnedFromJobId = null;
-  window.returnedFromStage = null;
-
-  clearCalculator();
+  clearCalculator(true);
   renderJobs();
 }
 
@@ -3968,15 +3636,12 @@ function renderJobHub() {
     </div>
   `;
 
-  const tabs = ['Job', 'Document', 'Materials', 'Financials', 'Photos'];
+  const tabs = ['Job', 'Documents', 'Financials'];
   document.getElementById('hub-tabs').innerHTML = tabs.map(t => `
     <button class="job-hub-tab ${t === 'Job' ? 'active' : ''}" onclick="switchHubTab('${t}')">
       ${t}
     </button>
   `).join('');
-
-  const returnBtn = document.getElementById('hub-btn-return');
-  if (returnBtn) returnBtn.style.display = '';
 
   switchHubTab('Job');
   openModal('modal-job-hub');
@@ -3991,14 +3656,10 @@ function switchHubTab(tab) {
   const content = document.getElementById('hub-content');
   if (tab === 'Job') {
     renderHubJobTab();
-  } else if (tab === 'Document') {
+  } else if (tab === 'Documents') {
     renderHubDocument();
-  } else if (tab === 'Materials') {
-    renderHubMaterials();
   } else if (tab === 'Financials') {
     renderHubFinancials();
-  } else if (tab === 'Photos') {
-    renderHubPhotos();
   }
 }
 
@@ -4010,39 +3671,44 @@ function renderHubJobTab() {
 
   let html = `<div style="padding:4px 0;">`;
 
-  // Job header
+  // Job header — price editable
   html += `
     <div style="text-align:center;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--border);">
-      <div style="font-size:24px;font-weight:800;color:var(--text);">$${fmt(j.price || 0)}</div>
+      <div style="display:inline-flex;align-items:baseline;gap:2px;">
+        <span style="font-size:20px;font-weight:800;color:var(--text);">$</span>
+        <input type="number" value="${j.price || 0}" min="0" step="0.01"
+          style="font-size:24px;font-weight:800;color:var(--text);background:transparent;border:none;border-bottom:2px dashed var(--border);text-align:center;width:140px;padding:0 4px;"
+          onchange="currentHubJob.price=parseFloat(this.value)||0;updateHubHeader();">
+      </div>
       <div style="font-size:12px;color:var(--text-2);margin-top:4px;">${esc(j.type || 'Painting Job')}</div>
     </div>
   `;
 
-  // Client & Job Details (collapsible)
+  // Client & Job Details
   html += `
-    <div style="margin-bottom:16px;">
-      <div style="display:flex;align-items:center;cursor:pointer;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border);" onclick="toggleClientDetails()">
-        <span style="font-size:13px;font-weight:700;flex:1;">✏️ Client & Job Details</span>
-        <span id="client-details-toggle" style="color:var(--text-3);">▶</span>
+    <div style="margin-bottom:12px;">
+      <div style="display:flex;align-items:center;cursor:pointer;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border);" onclick="toggleHubSection('client-details')">
+        <span style="font-size:13px;font-weight:700;flex:1;">Client & Job Details</span>
+        <span id="client-details-arrow" style="color:var(--text-3);font-size:12px;">▼</span>
       </div>
-      <div id="client-details-form" style="display:block;">
+      <div id="client-details" style="display:block;">
         <div class="form-group">
           <label>Client Name</label>
-          <input type="text" value="${esc(j.client)}" onchange="currentHubJob.client=this.value">
+          <input type="text" value="${esc(j.client)}" onchange="currentHubJob.client=this.value;updateHubHeader();">
         </div>
         <div class="form-row cols-2">
           <div class="form-group">
             <label>Phone</label>
-            <input type="tel" value="${esc(j.phone)}" onchange="currentHubJob.phone=this.value">
+            <input type="tel" value="${esc(j.phone || '')}" onchange="currentHubJob.phone=this.value">
           </div>
           <div class="form-group">
             <label>Email</label>
-            <input type="email" value="${esc(j.email)}" onchange="currentHubJob.email=this.value">
+            <input type="email" value="${esc(j.email || '')}" onchange="currentHubJob.email=this.value">
           </div>
         </div>
         <div class="form-group">
           <label>Address</label>
-          <input type="text" value="${esc(j.address)}" onchange="currentHubJob.address=this.value">
+          <input type="text" value="${esc(j.address || '')}" onchange="currentHubJob.address=this.value">
         </div>
         <div class="form-row cols-2">
           <div class="form-group">
@@ -4052,11 +3718,12 @@ function renderHubJobTab() {
               <option ${j.type === 'Exterior' ? 'selected' : ''}>Exterior</option>
               <option ${j.type === 'Trim & Doors' ? 'selected' : ''}>Trim & Doors</option>
               <option ${j.type === 'Cabinets' ? 'selected' : ''}>Cabinets</option>
+              <option ${j.type === 'Full Interior' ? 'selected' : ''}>Full Interior</option>
             </select>
           </div>
           <div class="form-group">
-            <label>Price</label>
-            <input type="number" value="${j.price || ''}" min="0" step="0.01" onchange="currentHubJob.price=parseFloat(this.value)||0">
+            <label>Date</label>
+            <input type="date" value="${j.date || ''}" onchange="currentHubJob.date=this.value">
           </div>
         </div>
         <div class="form-group">
@@ -4067,136 +3734,278 @@ function renderHubJobTab() {
     </div>
   `;
 
-  // QR Code section
+  // Rooms — full editable
+  const roomEntries = Object.entries(rooms);
   html += `
-    <div style="text-align:center;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--border);">
-      <div id="job-qr-code" style="display:inline-block;padding:10px;background:#f0ebe4;border-radius:var(--r-sm);"></div>
-      <div style="margin-top:8px;font-size:10px;color:var(--text-3);">Scan to open this job</div>
-      <button class="btn btn-outline btn-sm" style="margin-top:6px;font-size:11px;" onclick="downloadJobQR('${j.id}','${esc(j.client)}')">⬇ Save QR</button>
+    <div style="margin-bottom:12px;">
+      <div style="display:flex;align-items:center;cursor:pointer;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border);" onclick="toggleHubSection('hub-rooms')">
+        <span style="font-size:13px;font-weight:700;flex:1;">Rooms (${roomEntries.length})</span>
+        <span id="hub-rooms-arrow" style="color:var(--text-3);font-size:12px;">▼</span>
+      </div>
+      <div id="hub-rooms">
+        <div id="hub-rooms-list"></div>
+        <button class="btn btn-outline btn-sm" style="margin-top:8px;" onclick="addHubRoom()">+ Add Room</button>
+      </div>
     </div>
   `;
 
-  // Rooms breakdown
-  const roomEntries = Object.entries(rooms);
-  if (roomEntries.length > 0) {
-    html += `<div style="font-size:13px;font-weight:700;margin-bottom:8px;">📐 Rooms (${roomEntries.length})</div>`;
-    roomEntries.forEach(([id, rm]) => {
-      const wallSqft = 2 * ((rm.l || 0) + (rm.w || 0)) * (rm.h || 0) - (rm.doors || 0) * 21 - (rm.windows || 0) * 15;
-      html += `
-        <div style="padding:8px 10px;background:var(--surface-2);border-radius:var(--r-sm);margin-bottom:6px;font-size:12px;">
-          <div style="font-weight:700;color:var(--text);margin-bottom:4px;">${esc(rm.name || 'Room')}</div>
-          <div style="color:var(--text-2);">
-            ${rm.l}×${rm.w}×${rm.h}ft · ${Math.max(0,wallSqft).toFixed(0)} sq ft walls
-            ${rm.doors ? ' · '+rm.doors+' door(s)' : ''}${rm.windows ? ' · '+rm.windows+' window(s)' : ''}
-            ${rm.includeCeiling ? ' · Ceiling' : ''}${rm.includePrimer ? ' · Primer' : ''}${rm.includeTrim ? ' · Trim' : ''}${rm.paintDoors ? ' · Paint Doors' : ''}
-          </div>
-        </div>
-      `;
-    });
-  }
+  // Door & Window Pricing
+  const dp = j.doorPricing || [];
+  const wp = j.windowPricing || [];
+  const dwTotal = dp.reduce((s,d)=>s+(d.qty||0)*(d.price||0),0) + wp.reduce((s,w)=>s+(w.qty||0)*(w.price||0),0);
+  html += `
+    <div style="margin-bottom:12px;">
+      <div style="display:flex;align-items:center;cursor:pointer;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border);" onclick="toggleHubSection('hub-dw-pricing')">
+        <span style="font-size:13px;font-weight:700;flex:1;">Door & Window Pricing${dwTotal > 0 ? ' — $'+fmt(dwTotal) : ''}</span>
+        <span id="hub-dw-pricing-arrow" style="color:var(--text-3);font-size:12px;">▶</span>
+      </div>
+      <div id="hub-dw-pricing" style="display:none;">
+        <div style="font-size:12px;font-weight:600;color:var(--text-2);margin-bottom:6px;">Doors</div>
+        <div id="hub-door-list"></div>
+        <button class="btn btn-outline btn-sm" style="margin-bottom:12px;" onclick="addHubDWRow('door')">+ Door</button>
+        <div style="font-size:12px;font-weight:600;color:var(--text-2);margin-bottom:6px;">Windows</div>
+        <div id="hub-window-list"></div>
+        <button class="btn btn-outline btn-sm" onclick="addHubDWRow('window')">+ Window</button>
+      </div>
+    </div>
+  `;
 
-  // Paint summary
+  // Paint summary (read-only, auto-calculated)
   if (r.totalWallSqft) {
     html += `
-      <div style="font-size:13px;font-weight:700;margin:14px 0 8px;">🎨 Paint Requirements</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
-        <div style="padding:8px;background:var(--surface-2);border-radius:var(--r-sm);font-size:12px;">
-          <div style="color:var(--text-3);font-weight:600;">Wall Paint</div>
-          <div style="font-weight:700;">${r.totalWallGalCoats} gal</div>
+      <div style="margin-bottom:12px;">
+        <div style="display:flex;align-items:center;cursor:pointer;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border);" onclick="toggleHubSection('hub-paint-summary')">
+          <span style="font-size:13px;font-weight:700;flex:1;">Paint Requirements</span>
+          <span id="hub-paint-summary-arrow" style="color:var(--text-3);font-size:12px;">▶</span>
         </div>
-        ${r.hasCeilings ? `<div style="padding:8px;background:var(--surface-2);border-radius:var(--r-sm);font-size:12px;">
-          <div style="color:var(--text-3);font-weight:600;">Ceiling Paint</div>
-          <div style="font-weight:700;">${r.totalCeilGalCoats} gal</div>
-        </div>` : ''}
-        ${r.hasPrimer ? `<div style="padding:8px;background:var(--surface-2);border-radius:var(--r-sm);font-size:12px;">
-          <div style="color:var(--text-3);font-weight:600;">Primer</div>
-          <div style="font-weight:700;">${r.totalPrimerGalCoats} gal</div>
-        </div>` : ''}
-        ${(r.hasTrim || r.hasDoors) ? `<div style="padding:8px;background:var(--surface-2);border-radius:var(--r-sm);font-size:12px;">
-          <div style="color:var(--text-3);font-weight:600;">Trim & Door</div>
-          <div style="font-weight:700;">${r.totalTrimAndDoorGalCoats || ((r.totalTrimGalCoats||0)+(r.totalDoorGalCoats||0)).toFixed(1)} gal</div>
-          <div style="font-size:10px;color:var(--text-3);">${r.hasTrim ? 'Trim: '+r.totalTrimGalCoats : ''} ${r.hasDoors ? 'Door: '+r.totalDoorGalCoats : ''}</div>
-        </div>` : ''}
+        <div id="hub-paint-summary" style="display:none;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+            <div style="padding:8px;background:var(--surface-2);border-radius:var(--r-sm);font-size:12px;">
+              <div style="color:var(--text-3);font-weight:600;">Wall Paint</div>
+              <div style="font-weight:700;">${r.totalWallGalCoats} gal</div>
+            </div>
+            ${r.hasCeilings ? `<div style="padding:8px;background:var(--surface-2);border-radius:var(--r-sm);font-size:12px;">
+              <div style="color:var(--text-3);font-weight:600;">Ceiling</div>
+              <div style="font-weight:700;">${r.totalCeilGalCoats} gal</div>
+            </div>` : ''}
+            ${r.hasPrimer ? `<div style="padding:8px;background:var(--surface-2);border-radius:var(--r-sm);font-size:12px;">
+              <div style="color:var(--text-3);font-weight:600;">Primer</div>
+              <div style="font-weight:700;">${r.totalPrimerGalCoats} gal</div>
+            </div>` : ''}
+            ${(r.hasTrim || r.hasDoors) ? `<div style="padding:8px;background:var(--surface-2);border-radius:var(--r-sm);font-size:12px;">
+              <div style="color:var(--text-3);font-weight:600;">Trim & Door</div>
+              <div style="font-weight:700;">${r.totalTrimAndDoorGalCoats || ((r.totalTrimGalCoats||0)+(r.totalDoorGalCoats||0)).toFixed(1)} gal</div>
+            </div>` : ''}
+          </div>
+        </div>
       </div>
     `;
   }
 
-  // Expenses summary
-  const jobExpenses = DB.expenses.filter(e => (e.client || e.job || '').toLowerCase() === (j.client || '').toLowerCase());
-  if (jobExpenses.length > 0) {
-    const totalExp = jobExpenses.reduce((s, e) => s + (parseFloat(e.amount) || 0), 0);
-    html += `
-      <div style="font-size:13px;font-weight:700;margin:14px 0 8px;">💰 Expenses: $${fmt(totalExp)}</div>
-    `;
-  }
-
-  // Quick add doors/windows
+  // QR Code section
   html += `
-    <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border);">
-      <div style="font-size:13px;font-weight:700;margin-bottom:10px;">🚪 Add Doors / Windows</div>
-      <div style="font-size:11px;color:var(--text-3);margin-bottom:8px;">Add extra doors or windows after the initial quote. Updates paint calculations.</div>
-      <div class="form-row cols-2">
-        <div class="form-group">
-          <label>Extra Doors</label>
-          <input type="number" id="hub-extra-doors" value="0" min="0" style="text-align:center;">
-        </div>
-        <div class="form-group">
-          <label>Extra Windows</label>
-          <input type="number" id="hub-extra-windows" value="0" min="0" style="text-align:center;">
-        </div>
-      </div>
-      <button class="btn btn-outline btn-sm" onclick="addExtraDoorsWindows()">Add to Job</button>
-    </div>
-  `;
-
-  // Before / After Photos (inline in Job tab)
-  html += `
-    <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border);">
-      <div style="font-size:13px;font-weight:700;margin-bottom:10px;">📸 Before & After Photos</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
-        <label class="btn btn-outline btn-sm" style="text-align:center;cursor:pointer;font-size:11px;">
-          + Before
-          <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="handleJobPhoto(this.files,'${j.id}','before')">
-        </label>
-        <label class="btn btn-outline btn-sm" style="text-align:center;cursor:pointer;font-size:11px;">
-          + After
-          <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="handleJobPhoto(this.files,'${j.id}','after')">
-        </label>
-      </div>
-      <div id="job-tab-photos" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-        <div style="text-align:center;color:var(--text-3);font-size:10px;padding:12px;border:1px dashed var(--border);border-radius:var(--r-sm);">Before</div>
-        <div style="text-align:center;color:var(--text-3);font-size:10px;padding:12px;border:1px dashed var(--border);border-radius:var(--r-sm);">After</div>
-      </div>
-    </div>
-  `;
-
-  // Print button
-  html += `
-    <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border);">
-      <button class="btn btn-outline btn-sm btn-full" onclick="printJobBreakdown()">🖨 Print Job Breakdown</button>
+    <div style="text-align:center;margin-bottom:12px;padding:12px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
+      <div id="job-qr-code" style="display:inline-block;padding:8px;background:#f0ebe4;border-radius:var(--r-sm);"></div>
+      <div style="margin-top:6px;font-size:10px;color:var(--text-3);">Scan to open this job</div>
+      <button class="btn btn-outline btn-sm" style="margin-top:4px;font-size:11px;" onclick="downloadJobQR('${j.id}','${esc(j.client)}')">Save QR</button>
     </div>
   `;
 
   html += '</div>';
   content.innerHTML = html;
 
-  // Generate QR code after DOM is ready
+  renderHubRooms();
+  renderHubDWPricing();
   setTimeout(() => generateJobQR('job-qr-code', j.id, 120), 50);
-
-  // Load photos inline
-  loadJobTabPhotos(j.id);
 }
 
-function toggleClientDetails() {
-  const form = document.getElementById('client-details-form');
-  const toggle = document.getElementById('client-details-toggle');
-  if (form.style.display === 'none') {
-    form.style.display = 'block';
-    toggle.textContent = '▼';
+function updateHubHeader() {
+  const j = currentHubJob;
+  if (!j) return;
+  document.getElementById('hub-client').textContent = j.client || 'New Job';
+  document.getElementById('hub-stats').querySelector('.job-hub-stat-value').textContent = '$' + fmt(j.price || 0);
+}
+
+function toggleHubSection(id) {
+  const el = document.getElementById(id);
+  const arrow = document.getElementById(id + '-arrow');
+  if (!el) return;
+  if (el.style.display === 'none') {
+    el.style.display = 'block';
+    if (arrow) arrow.textContent = '▼';
   } else {
-    form.style.display = 'none';
-    toggle.textContent = '▶';
+    el.style.display = 'none';
+    if (arrow) arrow.textContent = '▶';
   }
+}
+
+function renderHubRooms() {
+  const j = currentHubJob;
+  if (!j) return;
+  const rooms = j.rooms || {};
+  const list = document.getElementById('hub-rooms-list');
+  if (!list) return;
+
+  list.innerHTML = Object.entries(rooms).map(([id, rm]) => {
+    const wallSqft = Math.max(0, 2*((parseFloat(rm.l)||0)+(parseFloat(rm.w)||0))*(parseFloat(rm.h)||0) - (parseInt(rm.doors)||0)*21 - (parseInt(rm.windows)||0)*15);
+    return `
+    <div style="background:var(--surface-2);border-radius:var(--r-sm);padding:10px;margin-bottom:8px;">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+        <input type="text" value="${esc(rm.name)}" placeholder="Room name"
+          style="flex:1;font-weight:700;font-size:13px;background:transparent;border:none;border-bottom:1px solid var(--border);padding:2px 4px;"
+          onchange="updateHubRoom('${id}','name',this.value)">
+        <span style="font-size:11px;color:var(--text-3);white-space:nowrap;">${wallSqft > 0 ? wallSqft.toFixed(0)+' ft²' : ''}</span>
+        <button style="background:none;border:none;color:var(--danger);font-size:14px;cursor:pointer;padding:2px 6px;" onclick="removeHubRoom('${id}')">✕</button>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-bottom:8px;">
+        <div style="text-align:center;">
+          <div style="font-size:9px;color:var(--text-3);margin-bottom:2px;">L</div>
+          <input type="number" value="${rm.l}" min="0" step="0.1" style="width:100%;text-align:center;font-size:12px;padding:4px 2px;" onchange="updateHubRoom('${id}','l',this.value)">
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:9px;color:var(--text-3);margin-bottom:2px;">W</div>
+          <input type="number" value="${rm.w}" min="0" step="0.1" style="width:100%;text-align:center;font-size:12px;padding:4px 2px;" onchange="updateHubRoom('${id}','w',this.value)">
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:9px;color:var(--text-3);margin-bottom:2px;">H</div>
+          <input type="number" value="${rm.h}" min="0" step="0.1" style="width:100%;text-align:center;font-size:12px;padding:4px 2px;" onchange="updateHubRoom('${id}','h',this.value)">
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:9px;color:var(--text-3);margin-bottom:2px;">Doors</div>
+          <input type="number" value="${rm.doors}" min="0" step="1" style="width:100%;text-align:center;font-size:12px;padding:4px 2px;" onchange="updateHubRoom('${id}','doors',this.value)">
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:9px;color:var(--text-3);margin-bottom:2px;">Win</div>
+          <input type="number" value="${rm.windows}" min="0" step="1" style="width:100%;text-align:center;font-size:12px;padding:4px 2px;" onchange="updateHubRoom('${id}','windows',this.value)">
+        </div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;font-size:11px;">
+        <label style="display:flex;align-items:center;gap:3px;padding:3px 8px;border-radius:20px;cursor:pointer;background:${rm.includeCeiling ? 'var(--accent)' : 'var(--surface-3)'};color:${rm.includeCeiling ? '#fff' : 'var(--text-2)'};">
+          <input type="checkbox" ${rm.includeCeiling ? 'checked' : ''} style="display:none;" onchange="updateHubRoom('${id}','includeCeiling',this.checked)">Ceiling
+        </label>
+        <label style="display:flex;align-items:center;gap:3px;padding:3px 8px;border-radius:20px;cursor:pointer;background:${rm.includePrimer ? 'var(--accent)' : 'var(--surface-3)'};color:${rm.includePrimer ? '#fff' : 'var(--text-2)'};">
+          <input type="checkbox" ${rm.includePrimer ? 'checked' : ''} style="display:none;" onchange="updateHubRoom('${id}','includePrimer',this.checked)">Primer
+        </label>
+        <label style="display:flex;align-items:center;gap:3px;padding:3px 8px;border-radius:20px;cursor:pointer;background:${rm.includeTrim ? 'var(--accent)' : 'var(--surface-3)'};color:${rm.includeTrim ? '#fff' : 'var(--text-2)'};">
+          <input type="checkbox" ${rm.includeTrim ? 'checked' : ''} style="display:none;" onchange="updateHubRoom('${id}','includeTrim',this.checked)">Trim
+        </label>
+        <label style="display:flex;align-items:center;gap:3px;padding:3px 8px;border-radius:20px;cursor:pointer;background:${rm.paintDoors ? 'var(--accent)' : 'var(--surface-3)'};color:${rm.paintDoors ? '#fff' : 'var(--text-2)'};">
+          <input type="checkbox" ${rm.paintDoors ? 'checked' : ''} style="display:none;" onchange="updateHubRoom('${id}','paintDoors',this.checked)">Doors
+        </label>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:4px;margin-top:8px;">
+        <div style="text-align:center;">
+          <div style="font-size:9px;color:var(--text-3);">Wall Coats</div>
+          <input type="number" value="${rm.wallCoats || 2}" min="1" max="5" style="width:100%;text-align:center;font-size:12px;padding:3px 2px;" onchange="updateHubRoom('${id}','wallCoats',this.value)">
+        </div>
+        ${rm.includeCeiling ? `<div style="text-align:center;">
+          <div style="font-size:9px;color:var(--text-3);">Ceil Coats</div>
+          <input type="number" value="${rm.ceilCoats || 2}" min="1" max="5" style="width:100%;text-align:center;font-size:12px;padding:3px 2px;" onchange="updateHubRoom('${id}','ceilCoats',this.value)">
+        </div>` : ''}
+        ${rm.includePrimer ? `<div style="text-align:center;">
+          <div style="font-size:9px;color:var(--text-3);">Primer Coats</div>
+          <input type="number" value="${rm.primerCoats || 1}" min="1" max="3" style="width:100%;text-align:center;font-size:12px;padding:3px 2px;" onchange="updateHubRoom('${id}','primerCoats',this.value)">
+        </div>` : ''}
+        ${rm.includeTrim ? `<div style="text-align:center;">
+          <div style="font-size:9px;color:var(--text-3);">Trim Coats</div>
+          <input type="number" value="${rm.trimCoats || 2}" min="1" max="5" style="width:100%;text-align:center;font-size:12px;padding:3px 2px;" onchange="updateHubRoom('${id}','trimCoats',this.value)">
+        </div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function updateHubRoom(id, field, val) {
+  const j = currentHubJob;
+  if (!j || !j.rooms || !j.rooms[id]) return;
+  if (field === 'name') {
+    j.rooms[id][field] = val;
+  } else if (['includeCeiling','includePrimer','includeTrim','paintDoors','primeDoors'].includes(field)) {
+    j.rooms[id][field] = val;
+    renderHubRooms(); // Re-render to show/hide coat fields
+  } else {
+    j.rooms[id][field] = parseFloat(val) || 0;
+  }
+  recalcJobPaint(j);
+}
+
+function addHubRoom() {
+  const j = currentHubJob;
+  if (!j) return;
+  if (!j.rooms) j.rooms = {};
+  const id = 'room_' + Date.now();
+  j.rooms[id] = {
+    name: 'Room', l: 0, w: 0, h: 8, doors: 0, windows: 0,
+    includeCeiling: false, includePrimer: false, includeTrim: false, paintDoors: false,
+    wallCoats: 2, ceilCoats: 2, primerCoats: 1, trimCoats: 2, extraDoors: 0, extraWindows: 0
+  };
+  recalcJobPaint(j);
+  renderHubRooms();
+}
+
+function removeHubRoom(id) {
+  const j = currentHubJob;
+  if (!j || !j.rooms) return;
+  delete j.rooms[id];
+  recalcJobPaint(j);
+  renderHubRooms();
+}
+
+function renderHubDWPricing() {
+  const j = currentHubJob;
+  if (!j) return;
+  if (!j.doorPricing) j.doorPricing = [];
+  if (!j.windowPricing) j.windowPricing = [];
+
+  const doorList = document.getElementById('hub-door-list');
+  const winList = document.getElementById('hub-window-list');
+  if (!doorList || !winList) return;
+
+  doorList.innerHTML = j.doorPricing.map(d => hubDWRowHtml(d, 'door')).join('') ||
+    '<div style="font-size:11px;color:var(--text-3);padding:4px 0;">No door pricing items</div>';
+  winList.innerHTML = j.windowPricing.map(w => hubDWRowHtml(w, 'window')).join('') ||
+    '<div style="font-size:11px;color:var(--text-3);padding:4px 0;">No window pricing items</div>';
+}
+
+function hubDWRowHtml(item, type) {
+  return `<div style="display:flex;gap:4px;margin-bottom:6px;align-items:center;font-size:12px;">
+    <input type="text" value="${esc(item.desc || '')}" placeholder="${type === 'door' ? 'Door' : 'Window'}"
+      style="flex:2;font-size:12px;padding:4px 6px;" onchange="updateHubDW('${type}','${item.id}','desc',this.value)">
+    <input type="number" value="${item.qty || 0}" min="0" style="width:45px;text-align:center;font-size:12px;padding:4px 2px;"
+      onchange="updateHubDW('${type}','${item.id}','qty',this.value)">
+    <span style="color:var(--text-3);">×$</span>
+    <input type="number" value="${item.price || 0}" min="0" step="1" style="width:60px;font-size:12px;padding:4px 4px;"
+      onchange="updateHubDW('${type}','${item.id}','price',this.value)">
+    <span style="font-weight:600;min-width:55px;text-align:right;">$${fmt((item.qty||0)*(item.price||0))}</span>
+    <button style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:14px;padding:0 4px;" onclick="removeHubDW('${type}','${item.id}')">✕</button>
+  </div>`;
+}
+
+function addHubDWRow(type) {
+  const j = currentHubJob;
+  if (!j) return;
+  const arr = type === 'door' ? (j.doorPricing || (j.doorPricing = [])) : (j.windowPricing || (j.windowPricing = []));
+  arr.push({ id: Date.now().toString(), desc: type === 'door' ? 'Interior Door' : 'Window', qty: 1, price: 0 });
+  renderHubDWPricing();
+}
+
+function updateHubDW(type, id, field, val) {
+  const j = currentHubJob;
+  if (!j) return;
+  const arr = type === 'door' ? j.doorPricing : j.windowPricing;
+  const item = (arr || []).find(d => String(d.id) === String(id));
+  if (!item) return;
+  if (field === 'desc') item.desc = val;
+  else item[field] = parseFloat(val) || 0;
+  renderHubDWPricing();
+}
+
+function removeHubDW(type, id) {
+  const j = currentHubJob;
+  if (!j) return;
+  if (type === 'door') j.doorPricing = (j.doorPricing || []).filter(d => String(d.id) !== String(id));
+  else j.windowPricing = (j.windowPricing || []).filter(d => String(d.id) !== String(id));
+  renderHubDWPricing();
 }
 
 function renderHubDocument() {
@@ -4424,78 +4233,6 @@ function populateDocForm() {
   setVal('inv_note', currentInvData.customNote || '');
 }
 
-function renderHubMaterials() {
-  const j = currentHubJob;
-  const content = document.getElementById('hub-content');
-  const r = j.calcResults || {};
-
-  // Show paint requirements summary from job data
-  let paintSummary = '';
-  if (r.totalWallGalCoats) paintSummary += `<div>Wall Paint: <strong>${r.totalWallGalCoats} gal</strong></div>`;
-  if (r.totalCeilGalCoats) paintSummary += `<div>Ceiling Paint: <strong>${r.totalCeilGalCoats} gal</strong></div>`;
-  if (r.totalPrimerGalCoats) paintSummary += `<div>Primer: <strong>${r.totalPrimerGalCoats} gal</strong></div>`;
-  if (r.totalTrimAndDoorGalCoats) paintSummary += `<div>Trim & Door: <strong>${r.totalTrimAndDoorGalCoats} gal</strong></div>`;
-  else if (r.totalTrimGalCoats || r.totalDoorGalCoats) paintSummary += `<div>Trim & Door: <strong>${((r.totalTrimGalCoats||0)+(r.totalDoorGalCoats||0)).toFixed(1)} gal</strong></div>`;
-
-  // Labor summary
-  const entries = j.laborEntries || [];
-  const laborTotal = entries.reduce((sum, e) => sum + ((e.hours || 0) * (e.rate || 0)), 0);
-
-  content.innerHTML = `
-    ${paintSummary ? `<div style="background:var(--surface-2);border-radius:var(--r-sm);padding:12px;margin-bottom:14px;display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:12px;">${paintSummary}</div>` : ''}
-    <div style="margin-bottom:14px;">
-      <div style="font-size:13px;font-weight:700;margin-bottom:10px;">Paint Specifications</div>
-      <div id="paint-specs-list"></div>
-      <button class="btn btn-outline btn-sm btn-full" onclick="addPaintSpec()">+ Add Paint Spec</button>
-    </div>
-    <div style="margin-top:20px;padding-top:14px;border-top:1px solid var(--border);">
-      <div style="font-size:13px;font-weight:700;margin-bottom:10px;">Materials Calculator</div>
-      <div class="form-row cols-2">
-        <div class="form-group">
-          <label>Brand</label>
-          <select id="mat_brand_hub" onchange="updatePCBrand()">
-            <option value="">Select</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Product</label>
-          <select id="mat_product_hub" onchange="updatePCProduct()">
-            <option value="">Select</option>
-          </select>
-        </div>
-      </div>
-      <div id="mat_summary" style="background:var(--surface-2);padding:10px;border-radius:var(--r-sm);margin-bottom:12px;font-size:12px;"></div>
-      <button class="btn btn-primary btn-sm" onclick="addMaterialsToJob()">Add to Expenses</button>
-    </div>
-    <div style="margin-top:20px;padding-top:14px;border-top:1px solid var(--border);">
-      <div style="font-size:13px;font-weight:700;margin-bottom:10px;">Sundries</div>
-      <div id="hub-sundry-list"></div>
-      <button class="btn btn-outline btn-sm btn-full" onclick="addHubSundry()">+ Add Sundry</button>
-      <button class="btn btn-primary btn-sm btn-full" style="margin-top:8px;" onclick="logHubSundries()">Log Sundries to Expenses</button>
-    </div>
-    <div style="margin-top:20px;padding-top:14px;border-top:1px solid var(--border);">
-      <div style="font-size:13px;font-weight:700;margin-bottom:10px;">Labor</div>
-      <div id="labor-entries-list"></div>
-      <button class="btn btn-outline btn-sm btn-full" onclick="addLaborEntry()">+ Add Labor</button>
-      <div style="margin-top:16px;padding:12px;background:var(--surface-2);border-radius:var(--r-sm);">
-        <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
-          <span>Total Labor Cost:</span>
-          <strong>$${fmt(laborTotal)}</strong>
-        </div>
-        <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-3);">
-          <span>Owner Takeaway (30%):</span>
-          <strong>$${fmt(laborTotal * 0.3)}</strong>
-        </div>
-      </div>
-    </div>
-  `;
-
-  initPCBrands();
-  renderPaintSpecs(j.paintSpecs || []);
-  renderHubSundries();
-  renderLaborEntries();
-}
-
 function addHubSundry() {
   if (!currentHubJob.hubSundries) currentHubJob.hubSundries = [];
   currentHubJob.hubSundries.push({ id: Date.now(), desc: '', amount: 0 });
@@ -4619,54 +4356,107 @@ function removeLaborEntry(i) {
 
 function renderHubFinancials() {
   const content = document.getElementById('hub-content');
-  const jobExpenses = DB.expenses.filter(e => (e.client || e.job || '').toLowerCase() === (currentHubJob.client || '').toLowerCase());
-  const jobId = currentHubJob.id;
+  const j = currentHubJob;
+  const jobExpenses = DB.expenses.filter(e => (e.client || e.job || '').toLowerCase() === (j.client || '').toLowerCase());
+  const jobId = j.id;
+  const totalExp = jobExpenses.reduce((s, e) => s + (parseFloat(e.amount) || 0), 0);
+  const profit = (parseFloat(j.price) || 0) - totalExp;
 
   content.innerHTML = `
-    <div style="margin-bottom:16px;">
-      <div style="font-size:13px;font-weight:700;margin-bottom:10px;">💰 Expenses</div>
-      <div id="hub-expenses-list"></div>
-      <button class="btn btn-primary btn-sm btn-full" onclick="openAddExpense()">+ Add Expense</button>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px;">
+      <div style="text-align:center;padding:10px;background:var(--surface-2);border-radius:var(--r-sm);">
+        <div style="font-size:16px;font-weight:800;color:var(--quote);">$${fmt(j.price || 0)}</div>
+        <div style="font-size:10px;color:var(--text-3);">Revenue</div>
+      </div>
+      <div style="text-align:center;padding:10px;background:var(--surface-2);border-radius:var(--r-sm);">
+        <div style="font-size:16px;font-weight:800;color:var(--danger);">$${fmt(totalExp)}</div>
+        <div style="font-size:10px;color:var(--text-3);">Expenses</div>
+      </div>
+      <div style="text-align:center;padding:10px;background:var(--surface-2);border-radius:var(--r-sm);">
+        <div style="font-size:16px;font-weight:800;color:${profit >= 0 ? 'var(--done)' : 'var(--danger)'};">$${fmt(profit)}</div>
+        <div style="font-size:10px;color:var(--text-3);">Profit</div>
+      </div>
     </div>
-    <div style="border-top:1px solid var(--border);padding-top:14px;margin-top:14px;">
-      <div style="font-size:13px;font-weight:700;margin-bottom:10px;">📷 Receipt Scanner</div>
-      <div style="display:flex;gap:8px;margin-bottom:12px;">
-        <label class="btn btn-primary btn-sm" style="flex:1;text-align:center;cursor:pointer;">
-          📸 Take Photo
+
+    <div style="margin-bottom:14px;">
+      <div style="font-size:13px;font-weight:700;margin-bottom:8px;">Expenses</div>
+      <div id="hub-expenses-list"></div>
+      <button class="btn btn-outline btn-sm btn-full" onclick="openAddExpense()">+ Add Expense</button>
+    </div>
+
+    <div style="border-top:1px solid var(--border);padding-top:12px;margin-bottom:14px;">
+      <div style="font-size:13px;font-weight:700;margin-bottom:8px;">Receipts</div>
+      <div style="display:flex;gap:8px;margin-bottom:10px;">
+        <label class="btn btn-outline btn-sm" style="flex:1;text-align:center;cursor:pointer;font-size:11px;">
+          Snap Receipt
           <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="handleReceiptCapture(this.files, '${jobId}')">
         </label>
-        <label class="btn btn-outline btn-sm" style="flex:1;text-align:center;cursor:pointer;">
-          📁 Upload
+        <label class="btn btn-outline btn-sm" style="flex:1;text-align:center;cursor:pointer;font-size:11px;">
+          Upload
           <input type="file" accept="image/*" multiple style="display:none;" onchange="handleReceiptCapture(this.files, '${jobId}')">
         </label>
       </div>
-    </div>
-    <div style="border-top:1px solid var(--border);padding-top:14px;margin-top:14px;">
-      <div style="font-size:13px;font-weight:700;margin-bottom:10px;">Receipt Gallery</div>
-      <div id="receipt-gallery" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-        <div style="padding:20px;text-align:center;color:var(--text-3);font-size:12px;grid-column:1/-1;">Loading receipts...</div>
+      <div id="receipt-gallery" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div style="padding:14px;text-align:center;color:var(--text-3);font-size:11px;grid-column:1/-1;">Loading...</div>
       </div>
+    </div>
+
+    <div style="border-top:1px solid var(--border);padding-top:12px;">
+      <div style="font-size:13px;font-weight:700;margin-bottom:8px;">Photos</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+        <label class="btn btn-outline btn-sm" style="text-align:center;cursor:pointer;font-size:11px;">
+          + Before
+          <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="handleJobPhoto(this.files,'${jobId}','before')">
+        </label>
+        <label class="btn btn-outline btn-sm" style="text-align:center;cursor:pointer;font-size:11px;">
+          + After
+          <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="handleJobPhoto(this.files,'${jobId}','after')">
+        </label>
+      </div>
+      <div id="hub-photos-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"></div>
     </div>
   `;
 
+  // Populate expenses
   if (!jobExpenses.length) {
-    document.getElementById('hub-expenses-list').innerHTML = '<div class="inv-empty-hint">No expenses for this job</div>';
+    document.getElementById('hub-expenses-list').innerHTML = '<div style="padding:12px;text-align:center;color:var(--text-3);font-size:12px;">No expenses yet</div>';
   } else {
     document.getElementById('hub-expenses-list').innerHTML = jobExpenses.map(e => `
-      <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px;margin-bottom:10px;">
-        <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
-          <strong>${esc(e.desc)}</strong>
-          <span style="font-weight:700;">$${fmt(e.amount)}</span>
+      <div style="display:flex;justify-content:space-between;padding:8px 10px;border-bottom:1px solid var(--border);font-size:12px;">
+        <div>
+          <div style="font-weight:600;">${esc(e.desc)}</div>
+          <div style="color:var(--text-3);font-size:10px;">${e.category || ''} · ${e.date || ''}</div>
         </div>
-        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-3);">
-          <span>${e.category || e.cat || ''}</span>
-          <span>${e.date}</span>
-        </div>
+        <strong>$${fmt(e.amount)}</strong>
       </div>
     `).join('');
   }
 
   loadReceiptGallery(jobId);
+  loadHubPhotos(jobId);
+}
+
+function loadHubPhotos(jobId) {
+  const grid = document.getElementById('hub-photos-grid');
+  if (!grid) return;
+  // Reuse existing photo loading
+  loadJobTabPhotos_into(jobId, grid);
+}
+
+function loadJobTabPhotos_into(jobId, container) {
+  if (!container) return;
+  getPhotosByJob(jobId).then(photos => {
+    if (!photos.length) {
+      container.innerHTML = `
+        <div style="text-align:center;color:var(--text-3);font-size:10px;padding:12px;border:1px dashed var(--border);border-radius:var(--r-sm);">Before</div>
+        <div style="text-align:center;color:var(--text-3);font-size:10px;padding:12px;border:1px dashed var(--border);border-radius:var(--r-sm);">After</div>
+      `;
+      return;
+    }
+    container.innerHTML = photos.map(p =>
+      '<img src="'+p.imageData+'" style="width:100%;height:80px;object-fit:cover;border-radius:4px;cursor:pointer;" onclick="viewPhoto(\''+p.id+'\')">'
+    ).join('');
+  }).catch(() => {});
 }
 
 function openAddExpense() {
@@ -4712,100 +4502,7 @@ function saveExpense() {
   showToast('Expense added');
 }
 
-function printJobBreakdown() {
-  const j = currentHubJob;
-  if (!j) return;
-  const r = j.calcResults || {};
-  const rooms = j.rooms || {};
-  const biz = DB.settings;
 
-  let html = `
-    <div style="font-family:'Inter',sans-serif;max-width:700px;margin:0 auto;padding:20px;">
-      <div style="text-align:center;margin-bottom:20px;padding-bottom:16px;border-bottom:2px solid #333;">
-        <div style="font-size:22px;font-weight:800;">${esc(biz.bizname || 'BrushWork')}</div>
-        ${biz.phone ? '<div style="font-size:12px;color:#666;">'+esc(biz.phone)+'</div>' : ''}
-        ${biz.email ? '<div style="font-size:12px;color:#666;">'+esc(biz.email)+'</div>' : ''}
-      </div>
-      <h2 style="text-align:center;">Job Breakdown</h2>
-      <div style="margin:16px 0;">
-        <strong>Client:</strong> ${esc(j.client)}<br>
-        ${j.address ? '<strong>Address:</strong> '+esc(j.address)+'<br>' : ''}
-        ${j.phone ? '<strong>Phone:</strong> '+esc(j.phone)+'<br>' : ''}
-        <strong>Date:</strong> ${j.date || ''}<br>
-        <strong>Type:</strong> ${esc(j.type || '')}<br>
-        <strong>Total Price:</strong> $${fmt(j.price || 0)}
-      </div>
-  `;
-
-  // Rooms
-  const roomEntries = Object.entries(rooms);
-  if (roomEntries.length) {
-    html += '<h3>Rooms</h3><table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:16px;">';
-    html += '<tr style="background:#f0f0f0;"><th style="padding:6px;text-align:left;border:1px solid #ddd;">Room</th><th style="padding:6px;border:1px solid #ddd;">Dimensions</th><th style="padding:6px;border:1px solid #ddd;">Wall Sq Ft</th><th style="padding:6px;border:1px solid #ddd;">Options</th></tr>';
-    roomEntries.forEach(([id, rm]) => {
-      const wallSqft = Math.max(0, 2 * ((rm.l||0)+(rm.w||0)) * (rm.h||0) - (rm.doors||0)*21 - (rm.windows||0)*15);
-      const opts = [];
-      if (rm.includeCeiling) opts.push('Ceiling');
-      if (rm.includePrimer) opts.push('Primer');
-      if (rm.includeTrim) opts.push('Trim');
-      if (rm.paintDoors) opts.push('Paint Doors');
-      html += `<tr><td style="padding:6px;border:1px solid #ddd;">${esc(rm.name)}</td><td style="padding:6px;border:1px solid #ddd;">${rm.l}×${rm.w}×${rm.h}</td><td style="padding:6px;border:1px solid #ddd;">${wallSqft.toFixed(0)}</td><td style="padding:6px;border:1px solid #ddd;">${opts.join(', ') || '-'}</td></tr>`;
-    });
-    html += '</table>';
-  }
-
-  // Paint requirements
-  if (r.totalWallSqft) {
-    html += '<h3>Paint Requirements</h3><table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:16px;">';
-    html += '<tr style="background:#f0f0f0;"><th style="padding:6px;text-align:left;border:1px solid #ddd;">Type</th><th style="padding:6px;border:1px solid #ddd;">Area</th><th style="padding:6px;border:1px solid #ddd;">Gallons</th></tr>';
-    html += `<tr><td style="padding:6px;border:1px solid #ddd;">Wall Paint</td><td style="padding:6px;border:1px solid #ddd;">${fmt(r.totalWallSqft)} sq ft</td><td style="padding:6px;border:1px solid #ddd;">${r.totalWallGalCoats}</td></tr>`;
-    if (r.hasCeilings) html += `<tr><td style="padding:6px;border:1px solid #ddd;">Ceiling Paint</td><td style="padding:6px;border:1px solid #ddd;">${fmt(r.totalCeilSqft)} sq ft</td><td style="padding:6px;border:1px solid #ddd;">${r.totalCeilGalCoats}</td></tr>`;
-    if (r.hasPrimer) html += `<tr><td style="padding:6px;border:1px solid #ddd;">Primer</td><td style="padding:6px;border:1px solid #ddd;">${fmt(r.totalPrimerSqft)} sq ft</td><td style="padding:6px;border:1px solid #ddd;">${r.totalPrimerGalCoats}</td></tr>`;
-    if (r.hasTrim) html += `<tr><td style="padding:6px;border:1px solid #ddd;">Trim Paint</td><td style="padding:6px;border:1px solid #ddd;">${fmt(r.totalTrimLinearFt)} lin ft</td><td style="padding:6px;border:1px solid #ddd;">${r.totalTrimGalCoats}</td></tr>`;
-    if (r.hasDoors) html += `<tr><td style="padding:6px;border:1px solid #ddd;">Door Paint</td><td style="padding:6px;border:1px solid #ddd;">${fmt(r.totalDoorSqft)} sq ft</td><td style="padding:6px;border:1px solid #ddd;">${r.totalDoorGalCoats}</td></tr>`;
-    html += '</table>';
-  }
-
-  html += '</div>';
-
-  const win = window.open('', '_blank');
-  win.document.write('<!DOCTYPE html><html><head><title>Job Breakdown - '+esc(j.client)+'</title></head><body>'+html+'</body></html>');
-  win.document.close();
-  win.print();
-}
-
-function addExtraDoorsWindows() {
-  const extraDoors = parseInt(document.getElementById('hub-extra-doors')?.value) || 0;
-  const extraWindows = parseInt(document.getElementById('hub-extra-windows')?.value) || 0;
-  if (extraDoors === 0 && extraWindows === 0) {
-    showToast('Enter at least 1 door or window to add');
-    return;
-  }
-
-  const j = currentHubJob;
-  if (!j.rooms || !Object.keys(j.rooms).length) {
-    showToast('No rooms in this job to add to');
-    return;
-  }
-
-  // Add to the first room's extras
-  const firstRoomId = Object.keys(j.rooms)[0];
-  const room = j.rooms[firstRoomId];
-  room.extraDoors = (parseInt(room.extraDoors) || 0) + extraDoors;
-  room.extraWindows = (parseInt(room.extraWindows) || 0) + extraWindows;
-  if (extraDoors > 0) room.paintDoors = true;
-  if (extraWindows > 0) room.includeTrim = true;
-
-  // Recalculate paint for this job
-  recalcJobPaint(j);
-  saveDB();
-
-  const parts = [];
-  if (extraDoors > 0) parts.push(extraDoors + ' door(s)');
-  if (extraWindows > 0) parts.push(extraWindows + ' window(s)');
-  showToast('Added ' + parts.join(' and ') + ' to job');
-  renderHubJobTab();
-}
 
 // ============================================================
 // RECEIPT FUNCTIONS
@@ -5065,36 +4762,6 @@ async function loadJobTabPhotos(jobId) {
   }
 }
 
-function renderHubPhotos() {
-  const content = document.getElementById('hub-content');
-  const jobId = currentHubJob.id;
-
-  content.innerHTML = `
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;">
-      <div>
-        <div style="font-size:13px;font-weight:700;margin-bottom:8px;color:var(--quote);">📸 Before</div>
-        <label class="btn btn-outline btn-sm btn-full" style="cursor:pointer;text-align:center;">
-          + Add Before Photo
-          <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="handleJobPhoto(this.files,'${jobId}','before')">
-        </label>
-      </div>
-      <div>
-        <div style="font-size:13px;font-weight:700;margin-bottom:8px;color:var(--done);">✅ After</div>
-        <label class="btn btn-outline btn-sm btn-full" style="cursor:pointer;text-align:center;">
-          + Add After Photo
-          <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="handleJobPhoto(this.files,'${jobId}','after')">
-        </label>
-      </div>
-    </div>
-    <div id="photos-before-after" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
-      <div id="photos-before-col"><div style="padding:20px;text-align:center;color:var(--text-3);font-size:11px;">Loading...</div></div>
-      <div id="photos-after-col"><div style="padding:20px;text-align:center;color:var(--text-3);font-size:11px;">Loading...</div></div>
-    </div>
-  `;
-
-  loadJobPhotos(jobId);
-}
-
 async function handleJobPhoto(files, jobId, type) {
   if (!files || !files.length) return;
 
@@ -5163,7 +4830,7 @@ async function viewJobPhoto(photoId, jobId) {
     const content = document.getElementById('hub-content');
     content.innerHTML = `
       <div>
-        <button class="btn btn-outline btn-sm" onclick="renderHubPhotos()" style="margin-bottom:12px;">← Back to Photos</button>
+        <button class="btn btn-outline btn-sm" onclick="renderHubFinancials()" style="margin-bottom:12px;">← Back to Photos</button>
         <div style="text-align:center;margin-bottom:12px;">
           <span class="badge badge-${photo.type === 'before' ? 'quote' : 'done'}" style="font-size:12px;">${photo.type === 'before' ? 'Before' : 'After'}</span>
         </div>
@@ -5194,7 +4861,7 @@ async function updateJobPhoto(photoId, jobId) {
     photo.notes = document.getElementById('photo-notes').value;
     await saveJobPhoto(photo);
     showToast('Photo updated');
-    renderHubPhotos();
+    renderHubFinancials();
   } catch(err) {
     showToast('Error updating photo');
   }
@@ -5205,7 +4872,7 @@ async function deletePhotoConfirm(photoId, jobId) {
   try {
     await deleteJobPhoto(photoId);
     showToast('Photo deleted');
-    renderHubPhotos();
+    renderHubFinancials();
   } catch(err) {
     showToast('Error deleting photo');
   }
@@ -5412,61 +5079,6 @@ function closeJobHub() {
   closeModal('modal-job-hub');
   currentHubJob = null;
   currentHubStage = null;
-}
-
-function returnToCalculator() {
-  if (!currentHubJob) return;
-  const job = currentHubJob;
-  const stage = currentHubStage;
-
-  // Remove job from its current stage array
-  if (stage === 'quoted') DB.quotes = DB.quotes.filter(q => q.id !== job.id);
-  else if (stage === 'inprogress') DB.inprogress = DB.inprogress.filter(q => q.id !== job.id);
-  else if (stage === 'completed') DB.completed = DB.completed.filter(q => q.id !== job.id);
-
-  window.returnedFromJobId = job.id;
-  window.returnedFromStage = stage;
-
-  // Close the hub modal
-  closeJobHub();
-  saveDB();
-
-  // Switch to calculator tab immediately
-  showTab('calculator');
-
-  // Populate calculator with job data (after tab is visible so DOM elements exist)
-  setTimeout(() => {
-    window.rooms = JSON.parse(JSON.stringify(job.rooms || {}));
-    setVal('calc_client', job.client || '');
-    setVal('calc_phone', job.phone || '');
-    setVal('calc_email', job.email || '');
-    setVal('calc_address', job.address || '');
-
-    // Set price rate
-    if (job.price) {
-      setVal('calc_rate', job.price);
-    }
-
-    // Check job type checkboxes
-    const jobTypes = job.jobTypes || (job.type ? job.type.split(', ') : []);
-    document.querySelectorAll('#calc_jobtype_chips input').forEach(cb => {
-      cb.checked = jobTypes.includes(cb.value);
-    });
-
-    // Restore door + window pricing
-    window.doorPricingItems = job.doorPricing ? JSON.parse(JSON.stringify(job.doorPricing)) : [];
-    window.windowPricingItems = job.windowPricing ? JSON.parse(JSON.stringify(job.windowPricing)) : [];
-    renderDoorPricing();
-    renderWindowPricing();
-
-    // Render room rows and recalculate
-    renderRoomRows();
-    recalc();
-
-    // Scroll to top of calculator
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    showToast('Job loaded for editing — save when done');
-  }, 100);
 }
 
 function saveHubChanges() {
@@ -5699,26 +5311,7 @@ function updatePCProduct() {
   }
 }
 
-function saveMaterialsAsExpense() {
-  const brand = gv('mat_brand');
-  const product = gv('mat_product');
-  if (!brand || !product) {
-    showToast('Select a brand and product');
-    return;
-  }
-  const info = PAINT_DB[brand][product];
-  const client = gv('calc_client') || 'General';
-  DB.expenses.push({
-    id: 'exp_' + Date.now(),
-    client: client,
-    category: 'Paint & Supplies',
-    desc: brand + ' - ' + product,
-    amount: info.cost,
-    date: new Date().toISOString().slice(0, 10),
-  });
-  saveDB();
-  showToast('Materials added as expense');
-}
+
 
 function addMaterialsToJob() {
   if (!currentHubJob) return;
@@ -5758,12 +5351,11 @@ function closeSettings() {
 
 function renderSettingsNav(activeSub) {
   const nav = document.getElementById('settings-nav');
-  const subs = ['Dashboard', 'Clients', 'Expenses', 'Settings', 'Data'];
+  const subs = ['Dashboard', 'Clients', 'Company', 'Data'];
   nav.innerHTML = subs.map(s => `<button class="btn btn-sm ${s === activeSub ? 'active' : ''}" onclick="renderSettingsContent('${s}')">${s}</button>`).join('');
 }
 
 function renderSettingsContent(sub) {
-  // Update nav active state
   renderSettingsNav(sub);
 
   const body = document.getElementById('settings-body');
@@ -5773,51 +5365,59 @@ function renderSettingsContent(sub) {
     renderDashboardPanel();
   } else if (sub === 'Clients') {
     renderClientsSettings();
-  } else if (sub === 'Expenses') {
-    renderExpensesPanel();
-  } else if (sub === 'Settings') {
-    // Business settings
+  } else if (sub === 'Company') {
     body.innerHTML = `
-      <div class="form-group">
-        <label>Company Name</label>
-        <input type="text" value="${esc(s.bizname)}" onchange="DB.settings.bizname=this.value;updateHeader();saveSettings()">
+      <div class="form-row cols-2">
+        <div class="form-group">
+          <label>Company Name</label>
+          <input type="text" value="${esc(s.bizname)}" onchange="DB.settings.bizname=this.value;updateHeader();saveSettings()">
+        </div>
+        <div class="form-group">
+          <label>Owner Name</label>
+          <input type="text" value="${esc(s.owner)}" onchange="DB.settings.owner=this.value;saveSettings()">
+        </div>
       </div>
-      <div class="form-group">
-        <label>Owner Name</label>
-        <input type="text" value="${esc(s.owner)}" onchange="DB.settings.owner=this.value;saveSettings()">
-      </div>
-      <div class="form-group">
-        <label>Phone</label>
-        <input type="tel" value="${esc(s.phone)}" onchange="DB.settings.phone=this.value;saveSettings()">
-      </div>
-      <div class="form-group">
-        <label>Email</label>
-        <input type="email" value="${esc(s.email)}" onchange="DB.settings.email=this.value;saveSettings()">
+      <div class="form-row cols-2">
+        <div class="form-group">
+          <label>Phone</label>
+          <input type="tel" value="${esc(s.phone)}" onchange="DB.settings.phone=this.value;saveSettings()">
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" value="${esc(s.email)}" onchange="DB.settings.email=this.value;saveSettings()">
+        </div>
       </div>
       <div class="form-group">
         <label>Address</label>
         <input type="text" value="${esc(s.address)}" onchange="DB.settings.address=this.value;saveSettings()">
       </div>
-      <div class="form-group">
-        <label>License #</label>
-        <input type="text" value="${esc(s.license)}" onchange="DB.settings.license=this.value;saveSettings()">
+      <div class="form-row cols-2">
+        <div class="form-group">
+          <label>License #</label>
+          <input type="text" value="${esc(s.license)}" onchange="DB.settings.license=this.value;saveSettings()">
+        </div>
+        <div class="form-group">
+          <label>Website</label>
+          <input type="url" value="${esc(s.website)}" onchange="DB.settings.website=this.value;saveSettings()">
+        </div>
       </div>
-      <div class="form-group">
-        <label>Website</label>
-        <input type="url" value="${esc(s.website)}" onchange="DB.settings.website=this.value;saveSettings()">
+      <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
+        <div style="font-size:13px;font-weight:700;margin-bottom:10px;">Document Defaults</div>
+        <div class="form-group">
+          <label>Payment Terms</label>
+          <input type="text" value="${esc(s.terms)}" onchange="DB.settings.terms=this.value;saveSettings()">
+        </div>
+        <div class="form-group">
+          <label>Invoice Note</label>
+          <textarea onchange="DB.settings.invoicenote=this.value;saveSettings()">${esc(s.invoicenote)}</textarea>
+        </div>
       </div>
-      <div class="form-group">
-        <label>Payment Terms</label>
-        <input type="text" value="${esc(s.terms)}" onchange="DB.settings.terms=this.value;saveSettings()">
-      </div>
-      <div class="form-group">
-        <label>Invoice Note</label>
-        <textarea onchange="DB.settings.invoicenote=this.value;saveSettings()">${esc(s.invoicenote)}</textarea>
-      </div>
-      <div class="form-group">
-        <label>Google Sheets Backup URL</label>
-        <input type="url" value="${esc(s.gsheetUrl || '')}" placeholder="Paste your Apps Script URL here" onchange="DB.settings.gsheetUrl=this.value;saveSettings()">
-        <div style="font-size:10px;color:var(--text-3);margin-top:4px;">Set up once using the provided Google Apps Script</div>
+      <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
+        <div style="font-size:13px;font-weight:700;margin-bottom:10px;">Integrations</div>
+        <div class="form-group">
+          <label>Google Sheets Backup URL</label>
+          <input type="url" value="${esc(s.gsheetUrl || '')}" placeholder="Paste your Apps Script URL here" onchange="DB.settings.gsheetUrl=this.value;saveSettings()">
+        </div>
       </div>
     `;
   } else if (sub === 'Data') {
@@ -5847,14 +5447,171 @@ function renderClientsSettings() {
     list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-3);">No clients yet</div>';
     return;
   }
-  list.innerHTML = clients.map(c => `
-    <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px;margin-bottom:10px;">
-      <div style="font-weight:700;margin-bottom:4px;">${esc(c.name)}</div>
-      <div style="font-size:12px;color:var(--text-2);">${esc(c.phone)}</div>
-      <div style="font-size:12px;color:var(--text-2);">${esc(c.email)}</div>
-      <button class="btn btn-outline btn-sm" style="margin-top:8px;" onclick="deleteClient('${c.id}')">Delete</button>
+
+  // Gather job counts per client
+  const allJobs = [...DB.quotes, ...DB.inprogress, ...DB.completed];
+  list.innerHTML = clients.map(c => {
+    const clientJobs = allJobs.filter(j => (j.client || '').toLowerCase() === (c.name || '').toLowerCase());
+    const totalValue = clientJobs.reduce((s, j) => s + (parseFloat(j.price) || 0), 0);
+    return `
+    <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px;margin-bottom:10px;cursor:pointer;transition:border-color .15s;"
+      onclick="openClientProfile('${c.id}')"
+      onmouseenter="this.style.borderColor='var(--accent)'" onmouseleave="this.style.borderColor='var(--border)'">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div style="flex:1;">
+          <div style="font-weight:700;margin-bottom:2px;">${esc(c.name)}</div>
+          <div style="font-size:11px;color:var(--text-3);">${esc(c.phone || '')}${c.phone && c.email ? ' · ' : ''}${esc(c.email || '')}</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:13px;font-weight:700;color:var(--accent);">${clientJobs.length} job${clientJobs.length !== 1 ? 's' : ''}</div>
+          ${totalValue > 0 ? `<div style="font-size:11px;color:var(--text-3);">$${fmt(totalValue)}</div>` : ''}
+        </div>
+        <span style="color:var(--text-3);font-size:14px;">›</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openClientProfile(clientId) {
+  const client = (DB.clients || []).find(c => c.id === clientId);
+  if (!client) return;
+
+  const allJobs = [...DB.quotes, ...DB.inprogress, ...DB.completed];
+  const clientJobs = allJobs.filter(j => (j.client || '').toLowerCase() === (client.name || '').toLowerCase());
+
+  // Sort by date descending
+  clientJobs.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+
+  const totalValue = clientJobs.reduce((s, j) => s + (parseFloat(j.price) || 0), 0);
+  const completedJobs = clientJobs.filter(j => j.stage === 'completed' || DB.completed.some(c => c.id === j.id));
+  const activeJobs = clientJobs.filter(j => j.stage === 'inprogress' || DB.inprogress.some(c => c.id === j.id));
+  const quotedJobs = clientJobs.filter(j => j.stage === 'quoted' || DB.quotes.some(c => c.id === j.id));
+
+  let html = `
+    <div style="padding:20px;max-height:80vh;overflow-y:auto;">
+      <div style="display:flex;align-items:center;margin-bottom:16px;">
+        <button class="btn btn-outline btn-sm" onclick="closeClientProfile()" style="margin-right:12px;">← Back</button>
+        <div style="flex:1;">
+          <div style="font-size:18px;font-weight:800;">${esc(client.name)}</div>
+          <div style="font-size:12px;color:var(--text-2);">${esc(client.phone || '')}${client.phone && client.email ? ' · ' : ''}${esc(client.email || '')}</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;">
+        <div style="text-align:center;padding:10px;background:var(--surface-2);border-radius:var(--r-sm);">
+          <div style="font-size:18px;font-weight:800;color:var(--accent);">${clientJobs.length}</div>
+          <div style="font-size:10px;color:var(--text-3);">Total Jobs</div>
+        </div>
+        <div style="text-align:center;padding:10px;background:var(--surface-2);border-radius:var(--r-sm);">
+          <div style="font-size:18px;font-weight:800;color:var(--quote);">$${fmt(totalValue)}</div>
+          <div style="font-size:10px;color:var(--text-3);">Total Value</div>
+        </div>
+        <div style="text-align:center;padding:10px;background:var(--surface-2);border-radius:var(--r-sm);">
+          <div style="font-size:18px;font-weight:800;color:var(--done);">${completedJobs.length}</div>
+          <div style="font-size:10px;color:var(--text-3);">Completed</div>
+        </div>
+      </div>
+  `;
+
+  if (!clientJobs.length) {
+    html += '<div style="padding:20px;text-align:center;color:var(--text-3);">No jobs on file for this client</div>';
+  } else {
+    // Job history cards
+    clientJobs.forEach(j => {
+      const stage = DB.quotes.find(q => q.id === j.id) ? 'quoted' : DB.inprogress.find(q => q.id === j.id) ? 'inprogress' : 'completed';
+      const badgeClass = stage === 'quoted' ? 'quote' : stage === 'inprogress' ? 'active' : 'done';
+      const stageLabel = stage === 'quoted' ? 'Quoted' : stage === 'inprogress' ? 'Active' : 'Completed';
+      const roomCount = j.rooms ? Object.keys(j.rooms).length : 0;
+
+      html += `
+        <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px;margin-bottom:8px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+            <span class="badge badge-${badgeClass}">${stageLabel}</span>
+            <span style="flex:1;font-size:12px;color:var(--text-2);">${esc(j.type || '')}</span>
+            <span style="font-weight:700;font-size:14px;">$${fmt(j.price || 0)}</span>
+          </div>
+          <div style="font-size:11px;color:var(--text-3);margin-bottom:8px;">
+            ${j.date || ''}${roomCount ? ' · ' + roomCount + ' room' + (roomCount > 1 ? 's' : '') : ''}
+            ${j.desc ? ' · ' + esc(j.desc) : ''}
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <button class="btn btn-outline btn-sm" style="font-size:11px;" onclick="closeClientProfile();openJobHub('${stage}','${j.id}')">View Job</button>
+            <button class="btn btn-outline btn-sm" style="font-size:11px;" onclick="clientPrintDoc('${j.id}','${stage}','estimate')">Print Estimate</button>
+            <button class="btn btn-outline btn-sm" style="font-size:11px;" onclick="clientPrintDoc('${j.id}','${stage}','invoice')">Print Invoice</button>
+          </div>
+        </div>
+      `;
+    });
+  }
+
+  html += `
+      <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border);">
+        <button class="btn btn-danger btn-sm" onclick="if(confirm('Delete this client?')){deleteClient('${client.id}');closeClientProfile();}">Delete Client</button>
+      </div>
     </div>
-  `).join('');
+  `;
+
+  // Render into settings body
+  document.getElementById('settings-body').innerHTML = html;
+}
+
+function closeClientProfile() {
+  renderClientsSettings();
+}
+
+function clientPrintDoc(jobId, stage, docType) {
+  let job = null;
+  if (stage === 'quoted') job = DB.quotes.find(j => j.id === jobId);
+  else if (stage === 'inprogress') job = DB.inprogress.find(j => j.id === jobId);
+  else job = DB.completed.find(j => j.id === jobId);
+  if (!job) { showToast('Job not found'); return; }
+
+  // Temporarily set up the document context
+  const prevHubJob = currentHubJob;
+  const prevDocType = currentDocType;
+  currentInvoiceJob = job;
+  currentDocType = docType;
+
+  initHubDocument(job, docType);
+
+  // Generate and print
+  if (typeof window.jspdf !== 'undefined' || typeof jspdf !== 'undefined') {
+    const savedJob = currentHubJob;
+    currentHubJob = job;
+    currentHubStage = stage;
+    generatePDFInvoice();
+    currentHubJob = savedJob;
+  } else {
+    // Fallback: build print-friendly HTML
+    const d = currentInvData || {};
+    const s = DB.settings;
+    const lineItems = d.lineItems && d.lineItems.length ? d.lineItems : [{ desc: job.desc || 'Services', amount: parseFloat(job.price) || 0 }];
+    const total = lineItems.reduce((s, x) => s + (parseFloat(x.amount) || 0), 0);
+
+    const win = window.open('', '_blank');
+    win.document.write(`<!DOCTYPE html><html><head><title>${docType === 'estimate' ? 'Estimate' : 'Invoice'}</title><style>
+      body { font-family: Arial, sans-serif; margin: 40px; color: #111; }
+      table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+      th { background: #2563eb; color: white; padding: 10px 14px; text-align: left; }
+      td { padding: 10px 14px; border-bottom: 1px solid #f0f0f0; }
+    </style></head><body>
+      <h1 style="color:#2563eb;">${esc(s.bizname || 'BrushWork')}</h1>
+      <h2>${docType === 'estimate' ? 'ESTIMATE' : 'INVOICE'}</h2>
+      <p><strong>Client:</strong> ${esc(job.client)}</p>
+      <p><strong>Date:</strong> ${d.date || job.date || ''}</p>
+      <table><thead><tr><th>Description</th><th style="text-align:right;">Amount</th></tr></thead><tbody>
+        ${lineItems.map(i => `<tr><td>${esc(i.desc||'')}</td><td style="text-align:right;font-weight:600;">$${fmt(i.amount||0)}</td></tr>`).join('')}
+      </tbody></table>
+      <p style="font-size:18px;font-weight:bold;text-align:right;">Total: $${fmt(total)}</p>
+    </body></html>`);
+    win.document.close();
+    win.focus();
+    setTimeout(() => win.print(), 400);
+  }
+
+  // Restore context
+  currentHubJob = prevHubJob;
+  currentDocType = prevDocType;
 }
 
 function renderDashboardPanel() {
@@ -5963,79 +5720,6 @@ function renderDashboardPanel() {
       `).join('')}
     </div>
     ` : ''}
-  `;
-}
-
-function renderExpensesPanel() {
-  const body = document.getElementById('settings-body');
-  const expenses = DB.expenses || [];
-
-  const totalExpenses = expenses.reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
-
-  const byClient = {};
-  expenses.forEach(e => {
-    const client = e.client || e.job || 'Unassigned';
-    if (!byClient[client]) byClient[client] = [];
-    byClient[client].push(e);
-  });
-
-  const byCat = {};
-  expenses.forEach(e => {
-    const cat = e.category || e.cat || 'Other';
-    if (!byCat[cat]) byCat[cat] = { total: 0, count: 0 };
-    byCat[cat].total += parseFloat(e.amount) || 0;
-    byCat[cat].count++;
-  });
-
-  body.innerHTML = `
-    <div style="background:var(--primary-dim);border:1px solid var(--primary);border-radius:var(--r-sm);padding:16px;text-align:center;margin-bottom:16px;">
-      <div style="font-size:28px;font-weight:800;color:var(--primary);">$${fmt(totalExpenses)}</div>
-      <div style="font-size:12px;color:var(--text-2);">Total Expenses (${expenses.length} entries)</div>
-    </div>
-
-    <div style="margin-bottom:16px;">
-      <div style="font-size:13px;font-weight:700;margin-bottom:8px;">By Category</div>
-      ${Object.entries(byCat).map(([cat, data]) => `
-        <div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--surface-2);border-radius:var(--r-sm);margin-bottom:6px;font-size:12px;">
-          <span>${esc(cat)} <span style="color:var(--text-3);">(${data.count})</span></span>
-          <strong>$${fmt(data.total)}</strong>
-        </div>
-      `).join('')}
-    </div>
-
-    <div style="margin-bottom:16px;">
-      <div style="font-size:13px;font-weight:700;margin-bottom:8px;">By Job/Client</div>
-      ${Object.entries(byClient).map(([client, exps]) => {
-        const total = exps.reduce((s, e) => s + (parseFloat(e.amount) || 0), 0);
-        return `
-          <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px;margin-bottom:8px;">
-            <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
-              <strong style="font-size:13px;">${esc(client)}</strong>
-              <span style="font-weight:700;color:var(--quote);">$${fmt(total)}</span>
-            </div>
-            <div style="font-size:11px;color:var(--text-3);">${exps.length} expense(s)</div>
-          </div>
-        `;
-      }).join('')}
-    </div>
-
-    <div style="margin-bottom:16px;">
-      <div style="font-size:13px;font-weight:700;margin-bottom:8px;">All Expenses</div>
-      <div id="master-expense-list" style="max-height:300px;overflow-y:auto;">
-        ${expenses.length ? expenses.sort((a, b) => (b.date || '').localeCompare(a.date || '')).map(e => `
-          <div style="display:flex;justify-content:space-between;padding:8px 10px;border-bottom:1px solid var(--border);font-size:12px;">
-            <div>
-              <div style="font-weight:600;">${esc(e.desc || '')}</div>
-              <div style="color:var(--text-3);font-size:11px;">${esc(e.client || e.job || '')} · ${e.category || e.cat || ''} · ${e.date || ''}</div>
-            </div>
-            <strong>$${fmt(e.amount)}</strong>
-          </div>
-        `).join('') : '<div class="inv-empty-hint">No expenses logged yet</div>'}
-      </div>
-    </div>
-
-    <button class="btn btn-outline btn-full" onclick="generateExpenseReport()">📊 Generate Tax Report</button>
-    <button class="btn btn-outline btn-full" style="margin-top:8px;" onclick="syncToGoogleSheets()">☁️ Sync to Google Sheets</button>
   `;
 }
 
@@ -6299,11 +5983,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Expand first accordion
-  const firstAccordion = document.querySelector('.accordion-section.open');
-  if (firstAccordion) {
-    firstAccordion.querySelector('.accordion-body').classList.add('open');
-  }
+  // Initialize calc step indicators
+  updateCalcSteps();
 
   // Handle QR code URL hash — auto-open job
   function handleHashNavigation() {
