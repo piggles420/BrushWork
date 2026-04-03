@@ -1697,16 +1697,19 @@
         </div>
 
         <!-- Pricing row -->
-        <div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;padding:10px 12px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-sm);">
-          <span style="font-size:11px;font-weight:700;color:var(--text-3);white-space:nowrap;">PRICING</span>
-          <div class="price-toggle">
-            <button class="active" onclick="setPriceMode('sqft')">Per Sq Ft</button>
-            <button onclick="setPriceMode('flat')">Flat Rate</button>
-          </div>
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;padding:10px 12px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-sm);">
+          <span style="font-size:11px;font-weight:700;color:var(--text-3);white-space:nowrap;">RATE $/sqft</span>
           <div style="flex:1;max-width:120px;">
-            <input type="number" id="calc_rate" placeholder="$ / sqft" min="0" step="0.01" oninput="recalc()"
+            <input type="number" id="calc_rate" placeholder="1.50" value="1.50" min="0" step="0.01" oninput="recalc()"
               style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--surface-3);color:var(--text);font-size:13px;font-weight:600;">
           </div>
+        </div>
+
+        <!-- Preset pricing buttons -->
+        <div style="display:flex;gap:4px;margin-bottom:14px;">
+          <button class="preset-btn" onclick="document.getElementById('calc_rate').value='1.50';recalc();" style="padding:4px 8px;font-size:10px;flex:1;background:var(--primary-dim);border:1px solid var(--primary);color:var(--primary);border-radius:var(--r-sm);cursor:pointer;font-weight:600;">$1.50</button>
+          <button class="preset-btn" onclick="document.getElementById('calc_rate').value='1.75';recalc();" style="padding:4px 8px;font-size:10px;flex:1;background:var(--primary-dim);border:1px solid var(--primary);color:var(--primary);border-radius:var(--r-sm);cursor:pointer;font-weight:600;">$1.75</button>
+          <button class="preset-btn" onclick="document.getElementById('calc_rate').value='2.00';recalc();" style="padding:4px 8px;font-size:10px;flex:1;background:var(--primary-dim);border:1px solid var(--primary);color:var(--primary);border-radius:var(--r-sm);cursor:pointer;font-weight:600;">$2.00</button>
         </div>
 
         <!-- Quick add presets -->
@@ -2233,7 +2236,9 @@ function addRoomRow(name, l, w, h, doors, windows) {
     primerCoats: 1,
     trimCoats: 2,
     extraDoors: 0,
-    extraWindows: 0
+    extraWindows: 0,
+    flatRate: false,
+    flatRateAmount: 0
   };
   renderRoomRows();
   recalc();
@@ -2297,7 +2302,21 @@ function renderRoomRows() {
           <input type="checkbox" ${room.paintDoors ? 'checked' : ''} onchange="updateRoom('${id}','paintDoors',this.checked)">
           Doors
         </label>
+        <label class="room-chip ${room.flatRate ? 'active' : ''}">
+          <input type="checkbox" ${room.flatRate ? 'checked' : ''} onchange="updateRoom('${id}','flatRate',this.checked)">
+          Flat Rate
+        </label>
       </div>
+      ${room.flatRate ? `
+      <div style="padding:8px 12px;background:var(--surface-2);border-radius:var(--r-sm);margin-top:8px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:11px;color:var(--text-3);font-weight:600;">Flat Rate ($)</span>
+          <input type="number" value="${room.flatRateAmount || 0}" min="0" step="0.01" placeholder="0.00"
+            onchange="updateRoom('${id}','flatRateAmount',this.value)"
+            style="flex:1;padding:6px 8px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--surface-3);color:var(--text);font-size:12px;">
+        </div>
+      </div>
+      ` : ''}
       <div class="room-details ${hasDetails ? 'has-options' : ''}">
         <div class="room-detail-grid">
           <div class="room-detail-item">
@@ -2339,9 +2358,11 @@ function updateRoom(id, field, val) {
   if (window.rooms[id]) {
     if (field === 'name') {
       window.rooms[id][field] = val;
-    } else if (field === 'includeCeiling' || field === 'includePrimer' || field === 'includeTrim' || field === 'paintDoors' || field === 'primeDoors') {
+    } else if (field === 'includeCeiling' || field === 'includePrimer' || field === 'includeTrim' || field === 'paintDoors' || field === 'primeDoors' || field === 'flatRate') {
       window.rooms[id][field] = val;
       renderRoomRows();
+    } else if (field === 'flatRateAmount') {
+      window.rooms[id][field] = parseFloat(val) || 0;
     } else {
       window.rooms[id][field] = parseFloat(val) || 0;
     }
@@ -2443,12 +2464,35 @@ function recalc() {
   const rate = parseFloat(gv('calc_rate')) || 0;
   let total = 0;
 
-  if (priceMode === 'sqft') {
-    total = totalSqft * rate;
-    // Primer adds 60% of a single coat cost (prep surcharge)
-    if (totalPrimerSqft > 0) {
-      total += totalPrimerSqft * rate * 0.60;
+  // Handle per-room flat rates
+  let flatRateRoomsTotal = 0;
+  let nonFlatRateSqft = 0;
+  let nonFlatRatePrimerSqft = 0;
+
+  rooms.forEach(([id, r]) => {
+    if (r.flatRate) {
+      flatRateRoomsTotal += (parseFloat(r.flatRateAmount) || 0);
+    } else {
+      const perimeter = 2 * ((parseFloat(r.l) || 0) + (parseFloat(r.w) || 0));
+      const wallArea = perimeter * (parseFloat(r.h) || 0);
+      const doorArea = (parseInt(r.doors) || 0) * 21;
+      const windowArea = (parseInt(r.windows) || 0) * 15;
+      const netWallSqft = Math.max(0, wallArea - doorArea - windowArea);
+      const ceilSqft = r.includeCeiling ? (parseFloat(r.l) || 0) * (parseFloat(r.w) || 0) : 0;
+      nonFlatRateSqft += (netWallSqft + ceilSqft);
+      if (r.includePrimer) {
+        nonFlatRatePrimerSqft += (netWallSqft + ceilSqft);
+      }
     }
+  });
+
+  if (priceMode === 'sqft') {
+    total = nonFlatRateSqft * rate;
+    // Primer adds 60% of a single coat cost (prep surcharge)
+    if (nonFlatRatePrimerSqft > 0) {
+      total += nonFlatRatePrimerSqft * rate * 0.60;
+    }
+    total += flatRateRoomsTotal;
   } else {
     total = rate;
   }
@@ -2539,7 +2583,7 @@ function clearCalculator(skipConfirm) {
   setVal('calc_phone', '');
   setVal('calc_email', '');
   setVal('calc_address', '');
-  setVal('calc_rate', '');
+  setVal('calc_rate', '1.50');
   // Reset job type checkboxes - uncheck all, then check Interior Walls
   document.querySelectorAll('#calc_jobtype_chips input').forEach(cb => cb.checked = false);
   const interiorWallsCheckbox = Array.from(document.querySelectorAll('#calc_jobtype_chips input')).find(cb => cb.value === 'Interior Walls');
@@ -2577,13 +2621,13 @@ function pricingRowHtml(item, type) {
 }
 
 function addDoorPricingRow() {
-  window.doorPricingItems.push({ id: Date.now(), desc: 'Interior Door', qty: 1, price: 0 });
+  window.doorPricingItems.push({ id: Date.now(), desc: 'Interior Door', qty: 1, price: 100 });
   renderDoorPricing();
   recalc();
 }
 
 function addWindowPricingRow() {
-  window.windowPricingItems.push({ id: Date.now() + 1, desc: 'Window', qty: 1, price: 0 });
+  window.windowPricingItems.push({ id: Date.now() + 1, desc: 'Window', qty: 1, price: 40 });
   renderWindowPricing();
   recalc();
 }
@@ -3689,9 +3733,9 @@ function renderHubJobTab() {
     <div style="margin-bottom:12px;">
       <div style="display:flex;align-items:center;cursor:pointer;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border);" onclick="toggleHubSection('client-details')">
         <span style="font-size:13px;font-weight:700;flex:1;">Client & Job Details</span>
-        <span id="client-details-arrow" style="color:var(--text-3);font-size:12px;">▼</span>
+        <span id="client-details-arrow" style="color:var(--text-3);font-size:12px;">▶</span>
       </div>
-      <div id="client-details" style="display:block;">
+      <div id="client-details" style="display:none;">
         <div class="form-group">
           <label>Client Name</label>
           <input type="text" value="${esc(j.client)}" onchange="currentHubJob.client=this.value;updateHubHeader();">
@@ -3740,9 +3784,9 @@ function renderHubJobTab() {
     <div style="margin-bottom:12px;">
       <div style="display:flex;align-items:center;cursor:pointer;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border);" onclick="toggleHubSection('hub-rooms')">
         <span style="font-size:13px;font-weight:700;flex:1;">Rooms (${roomEntries.length})</span>
-        <span id="hub-rooms-arrow" style="color:var(--text-3);font-size:12px;">▼</span>
+        <span id="hub-rooms-arrow" style="color:var(--text-3);font-size:12px;">▶</span>
       </div>
-      <div id="hub-rooms">
+      <div id="hub-rooms" style="display:none;">
         <div id="hub-rooms-list"></div>
         <button class="btn btn-outline btn-sm" style="margin-top:8px;" onclick="addHubRoom()">+ Add Room</button>
       </div>
@@ -5184,6 +5228,7 @@ function renderJobs() {
           <div class="kanban-card-detail">${esc(job.type || '')}</div>
           <div class="kanban-card-price">$${fmt(job.price || 0)}</div>
           <div class="kanban-card-date">${job.date || ''}</div>
+          <button class="btn btn-outline btn-xs" style="font-size:10px;padding:3px 6px;margin-top:4px;" onclick="showJobMaterials('${stage.key}','${job.id}');event.stopPropagation();">📦 Materials</button>
         </div>
       `).join('')}
       ${!stage.arr.length ? '<div class="kanban-empty">No jobs</div>' : ''}
@@ -5351,7 +5396,7 @@ function closeSettings() {
 
 function renderSettingsNav(activeSub) {
   const nav = document.getElementById('settings-nav');
-  const subs = ['Dashboard', 'Clients', 'Company', 'Data'];
+  const subs = ['Dashboard', 'Clients', 'Expenses', 'Company', 'Data'];
   nav.innerHTML = subs.map(s => `<button class="btn btn-sm ${s === activeSub ? 'active' : ''}" onclick="renderSettingsContent('${s}')">${s}</button>`).join('');
 }
 
@@ -5365,6 +5410,8 @@ function renderSettingsContent(sub) {
     renderDashboardPanel();
   } else if (sub === 'Clients') {
     renderClientsSettings();
+  } else if (sub === 'Expenses') {
+    renderExpenseReport();
   } else if (sub === 'Company') {
     body.innerHTML = `
       <div class="form-row cols-2">
@@ -5472,6 +5519,165 @@ function renderClientsSettings() {
   }).join('');
 }
 
+function renderExpenseReport() {
+  const body = document.getElementById('settings-body');
+  if (!DB.expenses) DB.expenses = [];
+
+  const expenses = DB.expenses;
+  const totalExpenses = expenses.reduce((s, e) => s + (parseFloat(e.amount) || 0), 0);
+
+  // Category breakdown
+  const byCategory = {};
+  expenses.forEach(e => {
+    const cat = e.category || 'Other';
+    byCategory[cat] = (byCategory[cat] || 0) + (parseFloat(e.amount) || 0);
+  });
+
+  let html = `
+    <div style="padding:0;">
+      <button class="btn btn-primary btn-full" style="margin-bottom:14px;" onclick="addNewExpense()">+ Add Expense</button>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+        <div style="background:var(--danger-dim);border:1px solid var(--danger);border-radius:var(--r-sm);padding:14px;text-align:center;">
+          <div style="font-size:22px;font-weight:800;color:var(--danger);">$${fmt(totalExpenses)}</div>
+          <div style="font-size:11px;color:var(--text-2);">Total Expenses</div>
+        </div>
+        <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-sm);padding:14px;text-align:center;">
+          <div style="font-size:22px;font-weight:800;color:var(--text);">${expenses.length}</div>
+          <div style="font-size:11px;color:var(--text-2);">Expense Count</div>
+        </div>
+      </div>
+
+      ${Object.keys(byCategory).length ? `
+      <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px;margin-bottom:14px;">
+        <div style="font-size:12px;font-weight:700;margin-bottom:8px;color:var(--text-2);">By Category</div>
+        <div style="display:grid;gap:4px;">
+          ${Object.entries(byCategory).map(([cat, amt]) => `
+            <div style="display:flex;justify-content:space-between;font-size:11px;padding:4px 0;">
+              <span>${cat}</span>
+              <span style="font-weight:700;">$${fmt(amt)}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      ` : ''}
+
+      <div style="font-size:12px;font-weight:700;margin-bottom:10px;color:var(--text-2);">Expense List</div>
+      ${!expenses.length ? `
+        <div style="padding:20px;text-align:center;color:var(--text-3);">No expenses recorded</div>
+      ` : `
+        <div id="expenses-list" style="display:grid;gap:8px;"></div>
+      `}
+    </div>
+  `;
+
+  body.innerHTML = html;
+
+  if (expenses.length) {
+    renderExpenseList();
+  }
+}
+
+function renderExpenseList() {
+  const list = document.getElementById('expenses-list');
+  if (!list) return;
+
+  list.innerHTML = (DB.expenses || []).map(e => `
+    <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px;display:grid;gap:6px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div style="flex:1;">
+          <div style="font-weight:700;font-size:12px;">${esc(e.description || 'Unnamed')}</div>
+          <div style="font-size:10px;color:var(--text-3);">${e.date || ''} · ${e.category || 'Other'}</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-weight:700;font-size:13px;">$${fmt(e.amount || 0)}</div>
+          ${e.jobId ? `<div style="font-size:9px;color:var(--text-3);">Job: ${e.jobId}</div>` : ''}
+        </div>
+      </div>
+      <div style="display:flex;gap:4px;">
+        <button class="btn btn-outline btn-xs" style="flex:1;font-size:9px;" onclick="editExpense('${e.id}')">Edit</button>
+        <button class="btn btn-outline btn-xs" style="flex:1;font-size:9px;" onclick="deleteExpense('${e.id}')">Delete</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function addNewExpense() {
+  const expense = {
+    id: 'exp_' + Date.now(),
+    date: new Date().toISOString().split('T')[0],
+    category: 'Supplies',
+    description: '',
+    amount: 0,
+    jobId: null
+  };
+  if (!DB.expenses) DB.expenses = [];
+  DB.expenses.unshift(expense);
+  saveDB();
+  renderExpenseReport();
+  editExpense(expense.id);
+}
+
+function editExpense(id) {
+  const expense = (DB.expenses || []).find(e => e.id === id);
+  if (!expense) return;
+
+  const jobOptions = [...DB.quotes, ...DB.inprogress, ...DB.completed]
+    .map(j => `<option value="${j.id}" ${expense.jobId === j.id ? 'selected' : ''}>${esc(j.client)} - ${esc(j.type)}</option>`)
+    .join('');
+
+  const modal = document.createElement('div');
+  modal.id = 'expense-modal';
+  modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:9998;';
+  modal.innerHTML = `
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px;max-width:400px;width:90%;">
+      <div style="font-size:14px;font-weight:700;margin-bottom:14px;">Edit Expense</div>
+      <div class="form-group" style="margin-bottom:10px;">
+        <label>Date</label>
+        <input type="date" value="${expense.date}" onchange="DB.expenses.find(e=>e.id==='${id}').date=this.value" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--surface-3);color:var(--text);">
+      </div>
+      <div class="form-group" style="margin-bottom:10px;">
+        <label>Category</label>
+        <input type="text" value="${esc(expense.category)}" placeholder="Supplies, Labor, Equipment, etc." onchange="DB.expenses.find(e=>e.id==='${id}').category=this.value" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--surface-3);color:var(--text);">
+      </div>
+      <div class="form-group" style="margin-bottom:10px;">
+        <label>Description</label>
+        <input type="text" value="${esc(expense.description)}" placeholder="Item details" onchange="DB.expenses.find(e=>e.id==='${id}').description=this.value" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--surface-3);color:var(--text);">
+      </div>
+      <div class="form-group" style="margin-bottom:10px;">
+        <label>Amount ($)</label>
+        <input type="number" value="${expense.amount || 0}" min="0" step="0.01" onchange="DB.expenses.find(e=>e.id==='${id}').amount=parseFloat(this.value)||0" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--surface-3);color:var(--text);">
+      </div>
+      <div class="form-group" style="margin-bottom:14px;">
+        <label>Associated Job (optional)</label>
+        <select onchange="DB.expenses.find(e=>e.id==='${id}').jobId=this.value||null" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--surface-3);color:var(--text);">
+          <option value="">None</option>
+          ${jobOptions}
+        </select>
+      </div>
+      <div style="display:flex;gap:6px;">
+        <button class="btn btn-primary" style="flex:1;" onclick="saveDB();closeExpenseModal();renderExpenseReport()">Save</button>
+        <button class="btn btn-outline" style="flex:1;" onclick="closeExpenseModal()">Cancel</button>
+      </div>
+    </div>
+  `;
+  modal.onclick = (e) => { if (e.target.id === 'expense-modal') closeExpenseModal(); };
+  document.body.appendChild(modal);
+}
+
+function closeExpenseModal() {
+  const modal = document.getElementById('expense-modal');
+  if (modal) modal.remove();
+}
+
+function deleteExpense(id) {
+  if (confirm('Delete this expense?')) {
+    DB.expenses = (DB.expenses || []).filter(e => e.id !== id);
+    saveDB();
+    renderExpenseReport();
+  }
+}
+
 function openClientProfile(clientId) {
   const client = (DB.clients || []).find(c => c.id === clientId);
   if (!client) return;
@@ -5535,9 +5741,9 @@ function openClientProfile(clientId) {
             ${j.desc ? ' · ' + esc(j.desc) : ''}
           </div>
           <div style="display:flex;gap:6px;flex-wrap:wrap;">
-            <button class="btn btn-outline btn-sm" style="font-size:11px;" onclick="closeClientProfile();openJobHub('${stage}','${j.id}')">View Job</button>
-            <button class="btn btn-outline btn-sm" style="font-size:11px;" onclick="clientPrintDoc('${j.id}','${stage}','estimate')">Print Estimate</button>
-            <button class="btn btn-outline btn-sm" style="font-size:11px;" onclick="clientPrintDoc('${j.id}','${stage}','invoice')">Print Invoice</button>
+            <button class="btn btn-outline btn-sm" style="font-size:11px;" onclick="openJobSummary('${stage}','${j.id}')">Job Summary</button>
+            <button class="btn btn-outline btn-sm" style="font-size:11px;" onclick="clientPrintDoc('${j.id}','${stage}','estimate')">Estimate</button>
+            <button class="btn btn-outline btn-sm" style="font-size:11px;" onclick="clientPrintDoc('${j.id}','${stage}','invoice')">Invoice</button>
           </div>
         </div>
       `;
@@ -5568,19 +5774,19 @@ function clientPrintDoc(jobId, stage, docType) {
 
   // Temporarily set up the document context
   const prevHubJob = currentHubJob;
+  const prevHubStage = currentHubStage;
   const prevDocType = currentDocType;
-  currentInvoiceJob = job;
+
+  // Set context for document generation
+  currentHubJob = job;
+  currentHubStage = stage;
   currentDocType = docType;
 
   initHubDocument(job, docType);
 
   // Generate and print
   if (typeof window.jspdf !== 'undefined' || typeof jspdf !== 'undefined') {
-    const savedJob = currentHubJob;
-    currentHubJob = job;
-    currentHubStage = stage;
     generatePDFInvoice();
-    currentHubJob = savedJob;
   } else {
     // Fallback: build print-friendly HTML
     const d = currentInvData || {};
@@ -5611,7 +5817,200 @@ function clientPrintDoc(jobId, stage, docType) {
 
   // Restore context
   currentHubJob = prevHubJob;
+  currentHubStage = prevHubStage;
   currentDocType = prevDocType;
+}
+
+function openJobSummary(stage, jobId) {
+  let job = null;
+  if (stage === 'quoted') job = DB.quotes.find(j => j.id === jobId);
+  else if (stage === 'inprogress') job = DB.inprogress.find(j => j.id === jobId);
+  else job = DB.completed.find(j => j.id === jobId);
+  if (!job) { showToast('Job not found'); return; }
+
+  const r = job.calcResults || {};
+  const rooms = job.rooms || {};
+  const dpTotal = (job.doorPricing || []).reduce((s,d)=>s+(d.qty||0)*(d.price||0),0);
+  const wpTotal = (job.windowPricing || []).reduce((s,w)=>s+(w.qty||0)*(w.price||0),0);
+
+  let html = `
+    <div style="padding:20px;max-height:85vh;overflow-y:auto;">
+      <div style="display:flex;align-items:center;margin-bottom:16px;">
+        <button class="btn btn-outline btn-sm" onclick="closeJobSummary()" style="margin-right:12px;">← Back</button>
+        <div style="flex:1;">
+          <div style="font-size:18px;font-weight:800;">Job Summary</div>
+          <div style="font-size:12px;color:var(--text-2);">${esc(job.client)}</div>
+        </div>
+      </div>
+
+      <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-sm);padding:14px;margin-bottom:14px;">
+        <div style="font-size:13px;font-weight:700;color:var(--text-2);margin-bottom:8px;">QUOTE TOTAL</div>
+        <div style="font-size:28px;font-weight:800;color:var(--quote);">$${fmt(job.price || 0)}</div>
+        <div style="font-size:11px;color:var(--text-3);margin-top:4px;">${job.type || 'Painting Job'}</div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
+        <div style="padding:10px;background:var(--surface-2);border-radius:var(--r-sm);">
+          <div style="font-size:10px;color:var(--text-3);font-weight:600;margin-bottom:4px;">Date</div>
+          <div style="font-size:13px;font-weight:700;">${job.date || 'N/A'}</div>
+        </div>
+        <div style="padding:10px;background:var(--surface-2);border-radius:var(--r-sm);">
+          <div style="font-size:10px;color:var(--text-3);font-weight:600;margin-bottom:4px;">Rooms</div>
+          <div style="font-size:13px;font-weight:700;">${Object.keys(rooms).length}</div>
+        </div>
+      </div>
+
+      <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px;margin-bottom:14px;">
+        <div style="font-size:12px;font-weight:700;margin-bottom:8px;color:var(--text);">Client Information</div>
+        ${job.client ? `<div style="margin-bottom:6px;"><span style="color:var(--text-3);font-size:11px;">Name:</span> <span style="font-weight:600;">${esc(job.client)}</span></div>` : ''}
+        ${job.address ? `<div style="margin-bottom:6px;"><span style="color:var(--text-3);font-size:11px;">Address:</span> <span style="font-weight:600;">${esc(job.address)}</span></div>` : ''}
+        ${job.phone ? `<div style="margin-bottom:6px;"><span style="color:var(--text-3);font-size:11px;">Phone:</span> <span style="font-weight:600;">${esc(job.phone)}</span></div>` : ''}
+        ${job.email ? `<div style="margin-bottom:0;"><span style="color:var(--text-3);font-size:11px;">Email:</span> <span style="font-weight:600;">${esc(job.email)}</span></div>` : ''}
+      </div>
+
+      <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px;margin-bottom:14px;">
+        <div style="font-size:12px;font-weight:700;margin-bottom:8px;color:var(--text);">Room Breakdown</div>
+        ${Object.keys(rooms).length ? `
+          <div style="display:grid;gap:6px;">
+            ${Object.entries(rooms).map(([id, rm]) => {
+              const wallSqft = Math.max(0, 2*((parseFloat(rm.l)||0)+(parseFloat(rm.w)||0))*(parseFloat(rm.h)||0) - (parseInt(rm.doors)||0)*21 - (parseInt(rm.windows)||0)*15);
+              return `
+              <div style="padding:8px;background:var(--surface-3);border-radius:var(--r-sm);font-size:11px;">
+                <div style="font-weight:700;margin-bottom:3px;">${esc(rm.name || 'Room')}</div>
+                <div style="color:var(--text-2);">${wallSqft.toFixed(0)} sq ft | ${rm.l}' × ${rm.w}' × ${rm.h}'H | ${rm.doors || 0} door${rm.doors !== 1 ? 's' : ''} | ${rm.windows || 0} window${rm.windows !== 1 ? 's' : ''}</div>
+              </div>
+              `;
+            }).join('')}
+          </div>
+        ` : '<div style="color:var(--text-3);font-size:11px;">No rooms</div>'}
+      </div>
+
+      <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px;margin-bottom:14px;">
+        <div style="font-size:12px;font-weight:700;margin-bottom:8px;color:var(--text);">Paint Requirements</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:11px;">
+          ${r.totalWallSqft ? `
+          <div style="padding:6px;background:var(--surface-3);border-radius:var(--r-sm);">
+            <div style="color:var(--text-3);">Walls</div>
+            <div style="font-weight:700;">${r.totalWallGalCoats || 0} gal</div>
+          </div>
+          ` : ''}
+          ${r.hasCeilings ? `
+          <div style="padding:6px;background:var(--surface-3);border-radius:var(--r-sm);">
+            <div style="color:var(--text-3);">Ceiling</div>
+            <div style="font-weight:700;">${r.totalCeilGalCoats || 0} gal</div>
+          </div>
+          ` : ''}
+          ${r.hasPrimer ? `
+          <div style="padding:6px;background:var(--surface-3);border-radius:var(--r-sm);">
+            <div style="color:var(--text-3);">Primer</div>
+            <div style="font-weight:700;">${r.totalPrimerGalCoats || 0} gal</div>
+          </div>
+          ` : ''}
+          ${(r.hasTrim || r.hasDoors) ? `
+          <div style="padding:6px;background:var(--surface-3);border-radius:var(--r-sm);">
+            <div style="color:var(--text-3);">Trim & Doors</div>
+            <div style="font-weight:700;">${r.totalTrimAndDoorGalCoats || 0} gal</div>
+          </div>
+          ` : ''}
+        </div>
+      </div>
+
+      ${(dpTotal > 0 || wpTotal > 0) ? `
+      <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px;margin-bottom:14px;">
+        <div style="font-size:12px;font-weight:700;margin-bottom:8px;color:var(--text);">Door & Window Pricing</div>
+        ${job.doorPricing && job.doorPricing.length ? `
+          <div style="margin-bottom:8px;">
+            <div style="font-size:11px;color:var(--text-3);margin-bottom:4px;">Doors</div>
+            ${job.doorPricing.map(d => `
+              <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:2px;">
+                <span>${esc(d.desc || 'Door')} × ${d.qty || 0}</span>
+                <span style="font-weight:700;">$${fmt((d.qty||0)*(d.price||0))}</span>
+              </div>
+            `).join('')}
+          </div>
+        ` : ''}
+        ${job.windowPricing && job.windowPricing.length ? `
+          <div>
+            <div style="font-size:11px;color:var(--text-3);margin-bottom:4px;">Windows</div>
+            ${job.windowPricing.map(w => `
+              <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:2px;">
+                <span>${esc(w.desc || 'Window')} × ${w.qty || 0}</span>
+                <span style="font-weight:700;">$${fmt((w.qty||0)*(w.price||0))}</span>
+              </div>
+            `).join('')}
+          </div>
+        ` : ''}
+      </div>
+      ` : ''}
+    </div>
+  `;
+
+  document.getElementById('settings-body').innerHTML = html;
+}
+
+function closeJobSummary() {
+  renderClientsSettings();
+}
+
+function showJobMaterials(stage, jobId) {
+  let job = null;
+  if (stage === 'quoted') job = DB.quotes.find(j => j.id === jobId);
+  else if (stage === 'inprogress') job = DB.inprogress.find(j => j.id === jobId);
+  else job = DB.completed.find(j => j.id === jobId);
+  if (!job) return;
+
+  const r = job.calcResults || {};
+  const dpTotal = (job.doorPricing || []).reduce((s,d)=>s+(d.qty||0)*(d.price||0),0);
+  const wpTotal = (job.windowPricing || []).reduce((s,w)=>s+(w.qty||0)*(w.price||0),0);
+
+  let html = `
+    <div style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:9999;" id="materials-overlay" onclick="if(event.target.id==='materials-overlay')closeMaterialsPopup()">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px;max-width:400px;max-height:70vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.4);">
+        <div style="display:flex;align-items:center;margin-bottom:16px;gap:10px;">
+          <div style="flex:1;">
+            <div style="font-size:14px;font-weight:700;">Materials & Pricing</div>
+            <div style="font-size:11px;color:var(--text-2);">${esc(job.client)}</div>
+          </div>
+          <button style="background:none;border:none;color:var(--text-2);cursor:pointer;font-size:20px;padding:0;" onclick="closeMaterialsPopup()">✕</button>
+        </div>
+
+        <div style="font-size:12px;font-weight:700;margin-bottom:8px;color:var(--text-2);">Paint Requirements</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:14px;">
+          ${r.totalWallGalCoats ? `<div style="padding:8px;background:var(--surface-2);border-radius:var(--r-sm);"><div style="font-size:10px;color:var(--text-3);">Walls</div><div style="font-size:13px;font-weight:700;">${r.totalWallGalCoats} gal</div></div>` : ''}
+          ${r.totalCeilGalCoats ? `<div style="padding:8px;background:var(--surface-2);border-radius:var(--r-sm);"><div style="font-size:10px;color:var(--text-3);">Ceiling</div><div style="font-size:13px;font-weight:700;">${r.totalCeilGalCoats} gal</div></div>` : ''}
+          ${r.totalPrimerGalCoats ? `<div style="padding:8px;background:var(--surface-2);border-radius:var(--r-sm);"><div style="font-size:10px;color:var(--text-3);">Primer</div><div style="font-size:13px;font-weight:700;">${r.totalPrimerGalCoats} gal</div></div>` : ''}
+          ${r.totalTrimAndDoorGalCoats ? `<div style="padding:8px;background:var(--surface-2);border-radius:var(--r-sm);"><div style="font-size:10px;color:var(--text-3);">Trim & Doors</div><div style="font-size:13px;font-weight:700;">${r.totalTrimAndDoorGalCoats} gal</div></div>` : ''}
+        </div>
+
+        ${(dpTotal > 0 || wpTotal > 0) ? `
+          <div style="font-size:12px;font-weight:700;margin-bottom:8px;color:var(--text-2);">Door & Window Pricing</div>
+          ${job.doorPricing && job.doorPricing.length ? `
+            <div style="margin-bottom:8px;">
+              <div style="font-size:10px;color:var(--text-3);margin-bottom:4px;">Doors</div>
+              ${job.doorPricing.map(d => `<div style="display:flex;justify-content:space-between;font-size:10px;margin-bottom:2px;"><span>${esc(d.desc)}</span><span style="font-weight:700;">$${fmt((d.qty||0)*(d.price||0))}</span></div>`).join('')}
+            </div>
+          ` : ''}
+          ${job.windowPricing && job.windowPricing.length ? `
+            <div>
+              <div style="font-size:10px;color:var(--text-3);margin-bottom:4px;">Windows</div>
+              ${job.windowPricing.map(w => `<div style="display:flex;justify-content:space-between;font-size:10px;margin-bottom:2px;"><span>${esc(w.desc)}</span><span style="font-weight:700;">$${fmt((w.qty||0)*(w.price||0))}</span></div>`).join('')}
+            </div>
+          ` : ''}
+          <div style="border-top:1px solid var(--border);padding-top:6px;margin-top:8px;display:flex;justify-content:space-between;font-size:11px;font-weight:700;">
+            <span>Subtotal D&W:</span>
+            <span>$${fmt(dpTotal + wpTotal)}</span>
+          </div>
+        ` : ''}
+      </div>
+    </div>
+  `;
+
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function closeMaterialsPopup() {
+  const overlay = document.getElementById('materials-overlay');
+  if (overlay) overlay.remove();
 }
 
 function renderDashboardPanel() {
