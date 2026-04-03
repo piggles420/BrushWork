@@ -2002,11 +2002,6 @@ function setVal(id, val) {
   if (el) el.value = val || '';
 }
 
-function setText(id, text) {
-  const el = document.getElementById(id);
-  if (el) el.textContent = text || '';
-}
-
 function showToast(msg) {
   const container = document.getElementById('toast-container');
   const toast = document.createElement('div');
@@ -2014,12 +2009,6 @@ function showToast(msg) {
   toast.textContent = msg;
   container.appendChild(toast);
   setTimeout(() => toast.remove(), 3000);
-}
-
-function addDays(date, days) {
-  const d = new Date(date);
-  d.setDate(d.getDate() + days);
-  return d;
 }
 
 function openModal(id) {
@@ -2063,6 +2052,17 @@ function loadDB() {
   if (!DB.clients) DB.clients = [];
   if (!DB.settings) DB.settings = {};
   if (!DB.invoiceCounter) DB.invoiceCounter = 1000;
+
+  // Migrate old expense records: normalize desc → description, ensure jobId
+  (DB.expenses || []).forEach(e => {
+    if (e.desc && !e.description) { e.description = e.desc; delete e.desc; }
+    if (!e.jobId && e.client) {
+      const allJobs = [...(DB.quotes||[]), ...(DB.inprogress||[]), ...(DB.completed||[])];
+      const match = allJobs.find(j => j.client && j.client.toLowerCase() === e.client.toLowerCase());
+      if (match) { e.jobId = match.id; e.jobName = match.client + ' — ' + (match.type || 'Job'); }
+    }
+    if (e.cat && !e.category) { e.category = e.cat; delete e.cat; }
+  });
 }
 
 function saveDB() {
@@ -2566,16 +2566,6 @@ function updateCalcSummary() {
   `;
 }
 
-function setPriceMode(mode) {
-  priceMode = mode;
-  const btns = document.querySelectorAll('.price-toggle button');
-  btns.forEach(b => b.classList.remove('active'));
-  event.target.classList.add('active');
-  const label = document.getElementById('price-label');
-  if (label) label.textContent = mode === 'sqft' ? 'Price per Sq Ft ($)' : 'Flat Rate ($)';
-  recalc();
-}
-
 function clearCalculator(skipConfirm) {
   if (!skipConfirm) {
     const hasData = (window.rooms && Object.keys(window.rooms).length) || gv('calc_client').trim();
@@ -2624,7 +2614,7 @@ function pricingRowHtml(item, type) {
     <input type="number" value="${item.price || ''}" placeholder="$/ea" min="0" step="1"
       onchange="updateDWPricing('${type}',${item.id},'price',this.value)"
       style="width:68px;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--surface-3);color:var(--text);font-size:12px;text-align:center;">
-    <button onclick="removeDWPricingRow('${type}',${item.id})" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:14px;padding:4px;">✕</button>
+    <button onclick="removeDWPricingRow('${type}',${item.id})" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:14px;padding:8px;">✕</button>
   </div>`;
 }
 
@@ -3083,53 +3073,6 @@ function autoLogMaterialExpenses(job) {
 // INVOICE FUNCTIONS
 // ============================================================
 
-function openInvoice(id) {
-  const c = DB.completed.find(x => x.id === id);
-  if (!c) return;
-  currentInvoiceJob = c;
-  currentDocType = 'invoice';
-  if (!c.invoiceData) {
-    c.invoiceData = {
-      invnum: c.invnum || ('INV-' + (DB.invoiceCounter || 1000)),
-      date: c.date || new Date().toISOString().slice(0, 10),
-      terms: DB.settings.terms || 'Due on receipt',
-      lineItems: [{ desc: c.desc || 'Painting Services', amount: parseFloat(c.price) || 0 }],
-      inclusions: [],
-      exclusions: [],
-      showPaintBreakdown: false,
-      customNote: DB.settings.invoicenote || '',
-    };
-  }
-  currentInvData = JSON.parse(JSON.stringify(c.invoiceData));
-  currentInvData.inclusions = normInvItems(currentInvData.inclusions);
-  currentInvData.exclusions = normInvItems(currentInvData.exclusions);
-  updateInvPreview();
-}
-
-function openEstimate(id) {
-  const q = DB.quotes.find(x => x.id === id);
-  if (!q) return;
-  currentInvoiceJob = q;
-  currentDocType = 'estimate';
-  if (!q.estimateData) {
-    DB.invoiceCounter = (DB.invoiceCounter || 1000) + 1;
-    q.estimateData = {
-      invnum: 'EST-' + DB.invoiceCounter,
-      date: q.date || new Date().toISOString().slice(0, 10),
-      terms: DB.settings.terms || 'Due on receipt',
-      lineItems: [{ desc: (q.type || 'Interior') + ' Painting — ' + (q.desc || 'Services'), amount: parseFloat(q.price) || 0 }],
-      inclusions: [],
-      exclusions: [],
-      showPaintBreakdown: false,
-      customNote: 'Thank you for considering us! This estimate is valid for 30 days.',
-    };
-  }
-  currentInvData = JSON.parse(JSON.stringify(q.estimateData));
-  currentInvData.inclusions = normInvItems(currentInvData.inclusions);
-  currentInvData.exclusions = normInvItems(currentInvData.exclusions);
-  updateInvPreview();
-}
-
 function getInvDataFromForm() {
   if (!currentInvData) return;
   currentInvData.invnum = gv('inv_num');
@@ -3141,8 +3084,8 @@ function getInvDataFromForm() {
 
 function renderInvLineItems() {
   const el = document.getElementById('inv_line_items');
-  if (!el) return;
-  el.innerHTML = currentInvData.lineItems.map((item, i) => `
+  if (!el || !currentInvData) return;
+  el.innerHTML = (currentInvData.lineItems || []).map((item, i) => `
     <div class="inv-item-row">
       <input class="inv-item-input" type="text" value="${esc(item.desc)}" placeholder="Description"
         oninput="currentInvData.lineItems[${i}].desc=this.value;updateInvPreview()">
@@ -3154,6 +3097,7 @@ function renderInvLineItems() {
 }
 
 function addInvLineItem() {
+  if (!currentInvData) return;
   currentInvData.lineItems.push({ desc: '', amount: 0 });
   renderInvLineItems();
   updateInvPreview();
@@ -3167,8 +3111,8 @@ function removeInvLineItem(i) {
 
 function renderInvInclusions() {
   const el = document.getElementById('inv_inclusions');
-  if (!el) return;
-  if (!currentInvData.inclusions.length) {
+  if (!el || !currentInvData) return;
+  if (!(currentInvData.inclusions || []).length) {
     el.innerHTML = '<div class="inv-empty-hint">None added yet</div>';
     return;
   }
@@ -3206,8 +3150,8 @@ function removeInvInclusion(i) {
 
 function renderInvExclusions() {
   const el = document.getElementById('inv_exclusions');
-  if (!el) return;
-  if (!currentInvData.exclusions.length) {
+  if (!el || !currentInvData) return;
+  if (!(currentInvData.exclusions || []).length) {
     el.innerHTML = '<div class="inv-empty-hint">None added yet</div>';
     return;
   }
@@ -3906,7 +3850,7 @@ function renderHubRooms() {
           style="flex:1;font-weight:700;font-size:13px;background:transparent;border:none;border-bottom:1px solid var(--border);padding:2px 4px;"
           onchange="updateHubRoom('${id}','name',this.value)">
         <span style="font-size:11px;color:var(--text-3);white-space:nowrap;">${wallSqft > 0 ? wallSqft.toFixed(0)+' ft²' : ''}</span>
-        <button style="background:none;border:none;color:var(--danger);font-size:14px;cursor:pointer;padding:2px 6px;" onclick="removeHubRoom('${id}')">✕</button>
+        <button style="background:none;border:none;color:var(--danger);font-size:14px;cursor:pointer;padding:8px;" onclick="removeHubRoom('${id}')">✕</button>
       </div>
       <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-bottom:8px;">
         <div style="text-align:center;">
@@ -4263,6 +4207,7 @@ function switchDocMode(type) {
 }
 
 function autoPopulateDoc() {
+  if (!currentInvData || !currentHubJob) return;
   if (!confirm('Re-generate line items and inclusions from job data? This will overwrite current entries.')) return;
   currentInvData.lineItems = buildAutoLineItems(currentHubJob);
   currentInvData.inclusions = buildAutoInclusions(currentHubJob);
@@ -4282,12 +4227,6 @@ function populateDocForm() {
   const cb = document.getElementById('inv_show_paint');
   if (cb) cb.checked = currentInvData.showPaintBreakdown || false;
   setVal('inv_note', currentInvData.customNote || '');
-}
-
-function addHubSundry() {
-  if (!currentHubJob.hubSundries) currentHubJob.hubSundries = [];
-  currentHubJob.hubSundries.push({ id: Date.now(), desc: '', amount: 0 });
-  renderHubSundries();
 }
 
 function removeHubSundry(id) {
@@ -4322,28 +4261,6 @@ function renderHubSundries() {
   `).join('');
 }
 
-function logHubSundries() {
-  const items = currentHubJob.hubSundries || [];
-  const client = currentHubJob.client || 'Unassigned';
-  let logged = 0;
-  items.forEach(s => {
-    if (s.desc && s.amount > 0) {
-      DB.expenses.push({
-        id: 'exp_' + Date.now() + Math.random(),
-        client: client,
-        category: 'Sundries',
-        desc: s.desc,
-        amount: s.amount,
-        date: new Date().toISOString().slice(0, 10),
-      });
-      logged++;
-    }
-  });
-  if (logged === 0) { showToast('No sundries to log'); return; }
-  saveDB();
-  showToast(logged + ' sundry expense(s) logged for ' + client);
-}
-
 function renderPaintSpecs(specs) {
   const list = document.getElementById('paint-specs-list');
   if (!list) return;
@@ -4358,12 +4275,6 @@ function renderPaintSpecs(specs) {
       <button class="inv-remove-btn" onclick="removePaintSpec(${i})">✕</button>
     </div>
   `).join('');
-}
-
-function addPaintSpec() {
-  if (!currentHubJob.paintSpecs) currentHubJob.paintSpecs = [];
-  currentHubJob.paintSpecs.push({ area: '', brand: '', colorName: '', colorCode: '', sheen: '' });
-  renderPaintSpecs(currentHubJob.paintSpecs);
 }
 
 function removePaintSpec(i) {
@@ -4390,12 +4301,6 @@ function renderLaborEntries() {
       <button class="inv-remove-btn" onclick="removeLaborEntry(${i})">✕</button>
     </div>
   `).join('');
-}
-
-function addLaborEntry() {
-  if (!currentHubJob.laborEntries) currentHubJob.laborEntries = [];
-  currentHubJob.laborEntries.push({ employee: '', hours: 0, rate: 0 });
-  renderLaborEntries();
 }
 
 function removeLaborEntry(i) {
@@ -4718,9 +4623,12 @@ async function logReceiptAsExpense(receiptId, jobId) {
       id: 'exp_' + Date.now(),
       client: currentHubJob.client || '',
       category: category,
-      desc: 'Receipt: ' + (notes || receipt.filename || 'Scanned receipt'),
+      description: 'Receipt: ' + (notes || receipt.filename || 'Scanned receipt'),
+      jobId: currentHubJob ? currentHubJob.id : null,
+      jobName: currentHubJob ? (currentHubJob.client + ' — ' + (currentHubJob.type || 'Job')) : '',
       amount: amount,
       date: date,
+      receiptData: null,
       receiptId: receiptId,
     });
     saveDB();
@@ -4781,94 +4689,13 @@ function deleteJobPhoto(photoId) {
   });
 }
 
-async function loadJobTabPhotos(jobId) {
-  const container = document.getElementById('job-tab-photos');
-  if (!container) return;
-  try {
-    const photos = await getPhotosByJob(jobId);
-    const before = photos.filter(p => p.type === 'before').sort((a,b) => (a.createdAt||'').localeCompare(b.createdAt||''));
-    const after = photos.filter(p => p.type === 'after').sort((a,b) => (a.createdAt||'').localeCompare(b.createdAt||''));
-
-    if (!before.length && !after.length) {
-      container.innerHTML = `
-        <div style="text-align:center;color:var(--text-3);font-size:10px;padding:16px;border:1px dashed var(--border);border-radius:var(--r-sm);">No before photos</div>
-        <div style="text-align:center;color:var(--text-3);font-size:10px;padding:16px;border:1px dashed var(--border);border-radius:var(--r-sm);">No after photos</div>`;
-      return;
-    }
-
-    const thumbs = (arr, label) => arr.length ? arr.slice(0, 3).map(p =>
-      '<img src="'+p.imageData+'" style="width:100%;height:70px;object-fit:cover;border-radius:4px;cursor:pointer;" onclick="switchHubTab(\'Photos\')">'
-    ).join('') + (arr.length > 3 ? '<div style="font-size:10px;color:var(--text-3);text-align:center;">+' + (arr.length-3) + ' more</div>' : '') :
-      '<div style="text-align:center;color:var(--text-3);font-size:10px;padding:16px;border:1px dashed var(--border);border-radius:var(--r-sm);">No '+label+' photos</div>';
-
-    container.innerHTML = `
-      <div style="display:flex;flex-direction:column;gap:4px;">
-        <div style="font-size:10px;font-weight:700;color:var(--quote);text-align:center;">Before</div>
-        ${thumbs(before, 'before')}
-      </div>
-      <div style="display:flex;flex-direction:column;gap:4px;">
-        <div style="font-size:10px;font-weight:700;color:var(--done);text-align:center;">After</div>
-        ${thumbs(after, 'after')}
-      </div>`;
-  } catch(e) {
-    container.innerHTML = '<div style="color:var(--text-3);font-size:10px;grid-column:1/-1;text-align:center;">Photos unavailable</div>';
-  }
-}
-
-async function handleJobPhoto(files, jobId, type) {
-  if (!files || !files.length) return;
-
-  for (const file of files) {
-    try {
-      showToast('Saving photo...');
-      const compressed = await compressImage(file, 1400);
-      const photo = {
-        id: 'photo_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
-        jobId: jobId,
-        type: type,
-        imageData: compressed,
-        filename: file.name,
-        date: new Date().toISOString().slice(0, 10),
-        notes: '',
-        createdAt: new Date().toISOString(),
-      };
-      await saveJobPhoto(photo);
-      showToast((type === 'before' ? 'Before' : 'After') + ' photo saved!');
-    } catch(err) {
-      showToast('Error saving photo');
-    }
-  }
-  loadJobPhotos(jobId);
-}
-
-async function loadJobPhotos(jobId) {
-  const beforeCol = document.getElementById('photos-before-col');
-  const afterCol = document.getElementById('photos-after-col');
-  if (!beforeCol || !afterCol) return;
-
-  try {
-    const photos = await getPhotosByJob(jobId);
-    const before = photos.filter(p => p.type === 'before').sort((a, b) => (a.createdAt || '').localeCompare(b.createdAt || ''));
-    const after = photos.filter(p => p.type === 'after').sort((a, b) => (a.createdAt || '').localeCompare(b.createdAt || ''));
-
-    beforeCol.innerHTML = before.length ? before.map(p => photoCard(p)).join('') :
-      '<div style="padding:30px 10px;text-align:center;color:var(--text-3);font-size:11px;border:1px dashed var(--border);border-radius:var(--r-sm);">No before photos yet</div>';
-
-    afterCol.innerHTML = after.length ? after.map(p => photoCard(p)).join('') :
-      '<div style="padding:30px 10px;text-align:center;color:var(--text-3);font-size:11px;border:1px dashed var(--border);border-radius:var(--r-sm);">No after photos yet</div>';
-  } catch(err) {
-    beforeCol.innerHTML = '<div style="color:var(--danger);font-size:11px;">Error loading</div>';
-    afterCol.innerHTML = '';
-  }
-}
-
 function photoCard(p) {
   return `
     <div style="margin-bottom:10px;border-radius:var(--r-sm);overflow:hidden;border:1px solid var(--border);background:var(--surface-2);">
       <img src="${p.imageData}" style="width:100%;height:130px;object-fit:cover;cursor:pointer;display:block;" onclick="viewJobPhoto('${p.id}','${p.jobId}')">
       <div style="padding:6px 8px;display:flex;justify-content:space-between;align-items:center;">
         <span style="font-size:10px;color:var(--text-3);">${p.date || ''}</span>
-        <button onclick="deletePhotoConfirm('${p.id}','${p.jobId}')" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:12px;padding:2px 4px;">✕</button>
+        <button onclick="deletePhotoConfirm('${p.id}','${p.jobId}')" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:12px;padding:6px 8px;">✕</button>
       </div>
     </div>
   `;
@@ -5338,57 +5165,6 @@ function initPCBrands() {
   sel.innerHTML = '<option value="">Select Brand</option>' + Object.keys(PAINT_DB).map(b => `<option>${b}</option>`).join('');
 }
 
-function updatePCBrand() {
-  const brand = (document.getElementById('mat_brand') || document.getElementById('mat_brand_hub')).value;
-  const prodSel = document.getElementById('mat_product') || document.getElementById('mat_product_hub');
-  if (!prodSel) return;
-  if (!brand) {
-    prodSel.innerHTML = '<option value="">Select Product</option>';
-    return;
-  }
-  const products = PAINT_DB[brand] || {};
-  prodSel.innerHTML = '<option value="">Select Product</option>' + Object.keys(products).map(p => `<option>${p}</option>`).join('');
-}
-
-function updatePCProduct() {
-  const brand = (document.getElementById('mat_brand') || document.getElementById('mat_brand_hub')).value;
-  const product = (document.getElementById('mat_product') || document.getElementById('mat_product_hub')).value;
-  if (!brand || !product) return;
-  const info = PAINT_DB[brand][product];
-  const summary = document.getElementById('mat_summary') || document.getElementById('shopping-list');
-  if (summary) {
-    summary.innerHTML = `
-      <div style="font-weight:700;margin-bottom:6px;">${brand} - ${product}</div>
-      <div style="font-size:11px;color:var(--text-2);margin-bottom:6px;">${info.desc}</div>
-      <div>Cost per gallon: <strong>$${fmt(info.cost)}</strong></div>
-    `;
-  }
-}
-
-
-
-function addMaterialsToJob() {
-  if (!currentHubJob) return;
-  const brand = gv('mat_brand_hub');
-  const product = gv('mat_product_hub');
-  if (!brand || !product) {
-    showToast('Select brand and product');
-    return;
-  }
-  const info = PAINT_DB[brand][product];
-  DB.expenses.push({
-    id: 'exp_' + Date.now(),
-    client: currentHubJob.client,
-    category: 'Paint & Supplies',
-    desc: brand + ' - ' + product,
-    amount: info.cost,
-    date: new Date().toISOString().slice(0, 10),
-  });
-  saveDB();
-  renderHubFinancials();
-  showToast('Materials added');
-}
-
 // ============================================================
 // SETTINGS
 // ============================================================
@@ -5759,47 +5535,6 @@ function attachReceiptInModal(expId, files) {
       saveDB();
       showToast('Receipt attached');
     }
-  };
-  reader.readAsDataURL(files[0]);
-}
-
-function uploadReceiptForExpense(expId, files) {
-  if (!files || !files.length) return;
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    const exp = (DB.expenses || []).find(x => x.id === expId);
-    if (exp) {
-      exp.receiptData = e.target.result;
-      saveDB();
-      showToast('Receipt attached');
-      renderExpenseList();
-    }
-  };
-  reader.readAsDataURL(files[0]);
-}
-
-function uploadExpenseReceipt(files) {
-  if (!files || !files.length) return;
-  // Create a new expense with the receipt
-  const expense = {
-    id: 'exp_' + Date.now(),
-    date: new Date().toISOString().split('T')[0],
-    category: 'Other',
-    description: files[0].name || 'Receipt upload',
-    amount: 0,
-    jobId: null,
-    jobName: '',
-    receiptData: null
-  };
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    expense.receiptData = e.target.result;
-    if (!DB.expenses) DB.expenses = [];
-    DB.expenses.unshift(expense);
-    saveDB();
-    showToast('Receipt uploaded — edit to add details');
-    renderExpenseReport();
-    editExpense(expense.id);
   };
   reader.readAsDataURL(files[0]);
 }
@@ -6396,166 +6131,6 @@ function importData() {
     reader.readAsText(file);
   };
   input.click();
-}
-
-function syncToGoogleSheets() {
-  const url = DB.settings.gsheetUrl;
-  if (!url) {
-    showToast('Set your Google Sheets URL in Settings first');
-    return;
-  }
-
-  const payload = {
-    timestamp: new Date().toISOString(),
-    business: DB.settings,
-    jobs: {
-      quotes: DB.quotes.map(j => ({
-        id: j.id, client: j.client, type: j.type, price: j.price, date: j.date,
-        address: j.address, phone: j.phone, email: j.email, stage: 'Quoted',
-        rooms: Object.values(j.rooms || {}).map(r => r.name).join(', '),
-      })),
-      active: DB.inprogress.map(j => ({
-        id: j.id, client: j.client, type: j.type, price: j.price, date: j.date,
-        address: j.address, phone: j.phone, email: j.email, stage: 'Active',
-        rooms: Object.values(j.rooms || {}).map(r => r.name).join(', '),
-      })),
-      completed: DB.completed.map(j => ({
-        id: j.id, client: j.client, type: j.type, price: j.price, date: j.date,
-        address: j.address, phone: j.phone, email: j.email, stage: 'Completed',
-        rooms: Object.values(j.rooms || {}).map(r => r.name).join(', '),
-      })),
-    },
-    expenses: (DB.expenses || []).map(e => ({
-      id: e.id, client: e.client || e.job || '', category: e.category || e.cat || '',
-      desc: e.desc, amount: e.amount, date: e.date,
-    })),
-    clients: (DB.clients || []).map(c => ({
-      name: c.name, phone: c.phone, email: c.email, address: c.address,
-    })),
-  };
-
-  showToast('Syncing to Google Sheets...');
-
-  fetch(url, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  }).then(() => {
-    DB.settings.lastSync = new Date().toISOString();
-    saveDB();
-    showToast('Sync complete!');
-  }).catch(err => {
-    showToast('Sync failed: ' + err.message);
-  });
-}
-
-function generateExpenseReport() {
-  const expenses = DB.expenses || [];
-  if (!expenses.length) { showToast('No expenses to report'); return; }
-
-  const s = DB.settings;
-  const year = new Date().getFullYear();
-
-  const byClient = {};
-  expenses.forEach(e => {
-    const client = e.client || e.job || 'Unassigned';
-    if (!byClient[client]) byClient[client] = [];
-    byClient[client].push(e);
-  });
-
-  const byCat = {};
-  expenses.forEach(e => {
-    const cat = e.category || e.cat || 'Other';
-    if (!byCat[cat]) byCat[cat] = 0;
-    byCat[cat] += parseFloat(e.amount) || 0;
-  });
-
-  const totalExpenses = expenses.reduce((s, e) => s + (parseFloat(e.amount) || 0), 0);
-  const totalRevenue = DB.completed.reduce((s, j) => s + (parseFloat(j.price) || 0), 0);
-
-  let html = `<!DOCTYPE html><html><head><title>Expense Report - ${esc(s.bizname)}</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 30px; color: #111; font-size: 12px; }
-    h1 { font-size: 22px; margin-bottom: 4px; }
-    h2 { font-size: 16px; margin: 20px 0 10px; border-bottom: 2px solid #333; padding-bottom: 4px; }
-    h3 { font-size: 14px; margin: 16px 0 8px; color: #555; }
-    table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
-    th { background: #2563eb; color: white; padding: 8px 10px; text-align: left; font-size: 11px; }
-    td { padding: 6px 10px; border-bottom: 1px solid #e5e7eb; }
-    .total-row { font-weight: bold; background: #f3f4f6; }
-    .summary-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin: 16px 0; }
-    .summary-box { border: 1px solid #ddd; border-radius: 6px; padding: 12px; text-align: center; }
-    .summary-box .value { font-size: 20px; font-weight: bold; }
-    .summary-box .label { font-size: 11px; color: #666; margin-top: 4px; }
-    @media print { body { margin: 15px; } }
-  </style></head><body>
-  <h1>${esc(s.bizname || 'BrushWork')} — Expense Report</h1>
-  <div style="color:#555;margin-bottom:20px;">
-    Generated: ${new Date().toLocaleDateString()} · Tax Year ${year}<br>
-    ${s.owner ? 'Owner: ' + esc(s.owner) + '<br>' : ''}
-    ${s.phone ? esc(s.phone) + ' · ' : ''}${s.email ? esc(s.email) : ''}
-  </div>
-
-  <div class="summary-grid">
-    <div class="summary-box">
-      <div class="value" style="color:#16a34a;">$${fmt(totalRevenue)}</div>
-      <div class="label">Total Revenue (Completed)</div>
-    </div>
-    <div class="summary-box">
-      <div class="value" style="color:#dc2626;">$${fmt(totalExpenses)}</div>
-      <div class="label">Total Expenses</div>
-    </div>
-    <div class="summary-box">
-      <div class="value" style="color:${totalRevenue - totalExpenses >= 0 ? '#16a34a' : '#dc2626'};">$${fmt(totalRevenue - totalExpenses)}</div>
-      <div class="label">Net Profit</div>
-    </div>
-  </div>
-
-  <h2>Expenses by Category</h2>
-  <table>
-    <tr><th>Category</th><th style="text-align:right;">Total</th></tr>
-    ${Object.entries(byCat).sort((a,b) => b[1]-a[1]).map(([cat, total]) =>
-      '<tr><td>' + esc(cat) + '</td><td style="text-align:right;">$' + fmt(total) + '</td></tr>'
-    ).join('')}
-    <tr class="total-row"><td>TOTAL</td><td style="text-align:right;">$${fmt(totalExpenses)}</td></tr>
-  </table>
-
-  <h2>Expenses by Job</h2>`;
-
-  Object.entries(byClient).forEach(([client, exps]) => {
-    const clientTotal = exps.reduce((s, e) => s + (parseFloat(e.amount) || 0), 0);
-    const job = [...DB.quotes, ...DB.inprogress, ...DB.completed].find(j => j.client === client);
-    const jobRevenue = job ? (parseFloat(job.price) || 0) : 0;
-
-    html += '<h3>' + esc(client) + (job ? ' — ' + esc(job.type || '') : '') + '</h3>';
-    if (job) html += '<div style="font-size:11px;color:#666;margin-bottom:6px;">Job Value: $' + fmt(jobRevenue) + ' · Expenses: $' + fmt(clientTotal) + ' · Margin: $' + fmt(jobRevenue - clientTotal) + '</div>';
-    html += '<table><tr><th>Date</th><th>Description</th><th>Category</th><th style="text-align:right;">Amount</th></tr>';
-    exps.sort((a, b) => (a.date || '').localeCompare(b.date || '')).forEach(e => {
-      html += '<tr><td>' + (e.date || '') + '</td><td>' + esc(e.desc || '') + '</td><td>' + esc(e.category || e.cat || '') + '</td><td style="text-align:right;">$' + fmt(e.amount) + '</td></tr>';
-    });
-    html += '<tr class="total-row"><td colspan="3">Subtotal</td><td style="text-align:right;">$' + fmt(clientTotal) + '</td></tr></table>';
-  });
-
-  html += `
-  <h2>Completed Jobs Summary</h2>
-  <table>
-    <tr><th>Client</th><th>Type</th><th>Date</th><th style="text-align:right;">Price</th></tr>
-    ${DB.completed.map(j => '<tr><td>' + esc(j.client) + '</td><td>' + esc(j.type || '') + '</td><td>' + (j.date || '') + '</td><td style="text-align:right;">$' + fmt(j.price) + '</td></tr>').join('')}
-    <tr class="total-row"><td colspan="3">TOTAL REVENUE</td><td style="text-align:right;">$${fmt(totalRevenue)}</td></tr>
-  </table>
-
-  <div style="margin-top:30px;padding-top:14px;border-top:2px solid #333;font-size:11px;color:#666;">
-    This report was generated by BrushWork for tax documentation purposes.<br>
-    Business: ${esc(s.bizname)} · License: ${esc(s.license || 'N/A')}
-  </div>
-  </body></html>`;
-
-  const win = window.open('', '_blank');
-  win.document.write(html);
-  win.document.close();
-  win.focus();
-  setTimeout(() => win.print(), 400);
 }
 
 function factoryReset() {
