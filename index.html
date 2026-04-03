@@ -163,6 +163,7 @@
       display: grid;
       grid-template-columns: 1fr;
       gap: 16px;
+      padding-bottom: 140px;
     }
 
     .accordion-section {
@@ -233,9 +234,9 @@
     .room-card {
       background: var(--surface-2);
       border: 1px solid var(--border);
-      border-radius: var(--r-sm);
-      padding: 14px;
+      border-radius: var(--r);
       margin-bottom: 12px;
+      overflow: hidden;
       transition: border-color 0.2s;
     }
 
@@ -246,8 +247,10 @@
     .room-card-top {
       display: flex;
       align-items: center;
-      gap: 12px;
-      margin-bottom: 12px;
+      gap: 10px;
+      padding: 12px 14px;
+      background: var(--surface-3);
+      border-bottom: 1px solid var(--border);
     }
 
     .room-name-inp {
@@ -257,68 +260,22 @@
       color: var(--text);
       background: none;
       border: none;
-      border-bottom: 2px solid var(--border-2);
-      padding: 4px 0 6px 0;
+      padding: 2px 0;
       outline: none;
-      transition: border-color 0.2s;
-    }
-
-    .room-name-inp:focus {
-      border-bottom-color: var(--quote);
     }
 
     .room-name-inp::placeholder {
       color: var(--text-3);
     }
 
-    .room-fields {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      margin-bottom: 12px;
-    }
-
-    .room-field {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .room-field label {
-      font-size: 10px;
-      font-weight: 800;
-      color: var(--text-3);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .room-field input {
-      padding: 10px 8px;
-      border: 1.5px solid var(--border-2);
-      border-radius: var(--r-sm);
-      background: var(--surface-3);
-      color: var(--text);
-      font-size: 15px;
-      font-weight: 600;
-      outline: none;
-      text-align: center;
-      transition: all 0.15s;
-    }
-
-    .room-field input:focus {
-      border-color: var(--quote);
-      background: var(--surface);
-      box-shadow: 0 0 0 3px var(--quote-dim);
-    }
-
     .room-del-btn {
       background: var(--danger-dim);
       border: 1px solid rgba(239,68,68,0.2);
-      border-radius: var(--r-sm);
+      border-radius: 6px;
       color: var(--danger);
       cursor: pointer;
-      font-size: 14px;
-      padding: 8px 12px;
+      font-size: 13px;
+      padding: 6px 10px;
       transition: all 0.2s;
       flex-shrink: 0;
       font-weight: 600;
@@ -328,56 +285,143 @@
       background: rgba(239,68,68,0.25);
     }
 
-    .room-toggles {
+    .room-dims {
+      padding: 12px 14px 10px;
+    }
+
+    .room-fields {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+
+    .room-field {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .room-field label {
+      font-size: 9px;
+      font-weight: 800;
+      color: var(--text-3);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      text-align: center;
+    }
+
+    .room-field input {
+      padding: 8px 4px;
+      border: 1.5px solid var(--border-2);
+      border-radius: 6px;
+      background: var(--surface-3);
+      color: var(--text);
+      font-size: 15px;
+      font-weight: 600;
+      outline: none;
+      text-align: center;
+      transition: all 0.15s;
+      width: 100%;
+    }
+
+    .room-field input:focus {
+      border-color: var(--quote);
+      background: var(--surface);
+      box-shadow: 0 0 0 3px var(--quote-dim);
+    }
+
+    /* Options chips row */
+    .room-options {
       display: flex;
       flex-wrap: wrap;
-      gap: 12px;
-      align-items: center;
-      margin-top: 10px;
-      padding-top: 10px;
-      border-top: 1px solid var(--border);
+      gap: 6px;
+      padding: 0 14px 12px;
     }
 
-    .room-toggle {
+    .room-chip {
       display: flex;
       align-items: center;
-      gap: 6px;
-      font-size: 12px;
-      color: var(--text-2);
-      cursor: pointer;
-    }
-
-    .room-toggle input[type="checkbox"] {
-      accent-color: var(--primary);
-      width: 16px;
-      height: 16px;
-    }
-
-    .room-toggle span {
-      font-weight: 600;
-    }
-
-    .room-coats-group {
-      display: flex;
-      align-items: center;
-      gap: 6px;
+      gap: 5px;
+      padding: 6px 10px;
+      border-radius: 20px;
       font-size: 11px;
-      color: var(--text-3);
+      font-weight: 600;
+      cursor: pointer;
+      border: 1.5px solid var(--border-2);
+      background: var(--surface-3);
+      color: var(--text-2);
+      transition: all 0.15s;
+      user-select: none;
+      -webkit-user-select: none;
     }
 
-    .room-coats-group label {
-      font-weight: 600;
+    .room-chip.active {
+      background: var(--primary-dim);
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .room-chip input[type="checkbox"] {
+      display: none;
+    }
+
+    /* Expandable options detail panel */
+    .room-details {
+      display: none;
+      padding: 10px 14px 14px;
+      border-top: 1px solid var(--border);
+      background: rgba(0,0,0,0.15);
+    }
+
+    .room-details.has-options {
+      display: block;
+    }
+
+    .room-detail-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+      gap: 8px;
+    }
+
+    .room-detail-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      padding: 6px 10px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+    }
+
+    .room-detail-item label {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-3);
       white-space: nowrap;
     }
 
-    .room-coats-group input {
+    .room-detail-item input {
+      width: 44px;
       padding: 4px 6px;
       border: 1px solid var(--border);
-      border-radius: var(--r-sm);
-      background: var(--surface-2);
+      border-radius: 4px;
+      background: var(--surface-3);
       color: var(--text);
-      font-size: 12px;
+      font-size: 13px;
       text-align: center;
+      font-weight: 600;
+    }
+
+    .room-detail-item input:focus {
+      border-color: var(--quote);
+      outline: none;
+    }
+
+    .room-detail-item .room-chip {
+      padding: 4px 8px;
+      font-size: 10px;
+      margin: 0;
     }
 
     .material-section {
@@ -1477,7 +1521,14 @@
       }
 
       .room-fields {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: repeat(3, 1fr);
+      }
+      .room-fields .room-field:nth-child(4),
+      .room-fields .room-field:nth-child(5) {
+        /* doors & windows share second row on mobile */
+      }
+      .room-detail-grid {
+        grid-template-columns: repeat(2, 1fr);
       }
 
       .job-hub-stats {
@@ -2107,87 +2158,94 @@ function renderRoomRows() {
   if (!container) return;
   if (!window.rooms) window.rooms = {};
 
-  container.innerHTML = Object.entries(window.rooms).map(([id, room]) => `
+  container.innerHTML = Object.entries(window.rooms).map(([id, room]) => {
+    const hasDetails = room.includeCeiling || room.includePrimer || room.includeTrim || room.paintDoors;
+    const wallSqft = Math.max(0, 2*((parseFloat(room.l)||0)+(parseFloat(room.w)||0))*(parseFloat(room.h)||0) - (parseInt(room.doors)||0)*21 - (parseInt(room.windows)||0)*15);
+
+    return `
     <div class="room-card">
       <div class="room-card-top">
         <input class="room-name-inp" type="text" value="${esc(room.name)}"
           placeholder="Room name" onchange="updateRoom('${id}','name',this.value)">
+        <span style="font-size:11px;color:var(--text-3);font-weight:600;white-space:nowrap;">${wallSqft > 0 ? wallSqft.toFixed(0)+' ft²' : ''}</span>
         <button class="room-del-btn" onclick="removeRoom('${id}')">✕</button>
       </div>
-      <div class="room-fields">
-        <div class="room-field">
-          <label>L (ft)</label>
-          <input type="number" value="${room.l}" min="0" step="0.1" onchange="updateRoom('${id}','l',this.value)">
-        </div>
-        <div class="room-field">
-          <label>W (ft)</label>
-          <input type="number" value="${room.w}" min="0" step="0.1" onchange="updateRoom('${id}','w',this.value)">
-        </div>
-        <div class="room-field">
-          <label>H (ft)</label>
-          <input type="number" value="${room.h}" min="0" step="0.1" onchange="updateRoom('${id}','h',this.value)">
-        </div>
-        <div class="room-field">
-          <label>Doors</label>
-          <input type="number" value="${room.doors}" min="0" step="1" onchange="updateRoom('${id}','doors',this.value)">
-        </div>
-        <div class="room-field">
-          <label>Windows</label>
-          <input type="number" value="${room.windows}" min="0" step="1" onchange="updateRoom('${id}','windows',this.value)">
+      <div class="room-dims">
+        <div class="room-fields">
+          <div class="room-field">
+            <label>L (ft)</label>
+            <input type="number" value="${room.l}" min="0" step="0.1" onchange="updateRoom('${id}','l',this.value)">
+          </div>
+          <div class="room-field">
+            <label>W (ft)</label>
+            <input type="number" value="${room.w}" min="0" step="0.1" onchange="updateRoom('${id}','w',this.value)">
+          </div>
+          <div class="room-field">
+            <label>H (ft)</label>
+            <input type="number" value="${room.h}" min="0" step="0.1" onchange="updateRoom('${id}','h',this.value)">
+          </div>
+          <div class="room-field">
+            <label>Doors</label>
+            <input type="number" value="${room.doors}" min="0" step="1" onchange="updateRoom('${id}','doors',this.value)">
+          </div>
+          <div class="room-field">
+            <label>Win</label>
+            <input type="number" value="${room.windows}" min="0" step="1" onchange="updateRoom('${id}','windows',this.value)">
+          </div>
         </div>
       </div>
-      <div class="room-toggles">
-        <label class="room-toggle">
+      <div class="room-options">
+        <label class="room-chip ${room.includeCeiling ? 'active' : ''}">
           <input type="checkbox" ${room.includeCeiling ? 'checked' : ''} onchange="updateRoom('${id}','includeCeiling',this.checked)">
-          <span>Ceiling</span>
+          Ceiling
         </label>
-        <label class="room-toggle">
+        <label class="room-chip ${room.includePrimer ? 'active' : ''}">
           <input type="checkbox" ${room.includePrimer ? 'checked' : ''} onchange="updateRoom('${id}','includePrimer',this.checked)">
-          <span>Primer</span>
+          Primer
         </label>
-        <label class="room-toggle">
+        <label class="room-chip ${room.includeTrim ? 'active' : ''}">
           <input type="checkbox" ${room.includeTrim ? 'checked' : ''} onchange="updateRoom('${id}','includeTrim',this.checked)">
-          <span>Trim/Base</span>
+          Trim
         </label>
-        <label class="room-toggle">
+        <label class="room-chip ${room.paintDoors ? 'active' : ''}">
           <input type="checkbox" ${room.paintDoors ? 'checked' : ''} onchange="updateRoom('${id}','paintDoors',this.checked)">
-          <span>Paint Doors</span>
+          Doors
         </label>
-        <div class="room-coats-group">
-          <label>Wall Coats</label>
-          <input type="number" value="${room.wallCoats}" min="1" max="5" style="width:45px;" onchange="updateRoom('${id}','wallCoats',this.value)">
-        </div>
-        ${room.includeCeiling ? `
-        <div class="room-coats-group">
-          <label>Ceil Coats</label>
-          <input type="number" value="${room.ceilCoats}" min="1" max="5" style="width:45px;" onchange="updateRoom('${id}','ceilCoats',this.value)">
-        </div>` : ''}
-        ${room.includePrimer ? `
-        <div class="room-coats-group">
-          <label>Primer Coats</label>
-          <input type="number" value="${room.primerCoats}" min="1" max="3" style="width:45px;" onchange="updateRoom('${id}','primerCoats',this.value)">
-        </div>` : ''}
-        ${room.includeTrim ? `
-        <div class="room-coats-group">
-          <label>Trim Coats</label>
-          <input type="number" value="${room.trimCoats}" min="1" max="5" style="width:45px;" onchange="updateRoom('${id}','trimCoats',this.value)">
-        </div>` : ''}
-        ${room.paintDoors ? `
-        <div class="room-coats-group">
-          <label>Extra Doors</label>
-          <input type="number" value="${room.extraDoors}" min="0" style="width:45px;" onchange="updateRoom('${id}','extraDoors',this.value)">
-        </div>
-        <div class="room-coats-group">
-          <label>Extra Windows</label>
-          <input type="number" value="${room.extraWindows}" min="0" style="width:45px;" onchange="updateRoom('${id}','extraWindows',this.value)">
-        </div>
-        <label class="room-toggle">
-          <input type="checkbox" ${room.primeDoors ? 'checked' : ''} onchange="updateRoom('${id}','primeDoors',this.checked)">
-          <span>Prime Doors</span>
-        </label>` : ''}
       </div>
-    </div>
-  `).join('');
+      <div class="room-details ${hasDetails ? 'has-options' : ''}">
+        <div class="room-detail-grid">
+          <div class="room-detail-item">
+            <label>Wall Coats</label>
+            <input type="number" value="${room.wallCoats}" min="1" max="5" onchange="updateRoom('${id}','wallCoats',this.value)">
+          </div>
+          ${room.includeCeiling ? `<div class="room-detail-item">
+            <label>Ceil Coats</label>
+            <input type="number" value="${room.ceilCoats}" min="1" max="5" onchange="updateRoom('${id}','ceilCoats',this.value)">
+          </div>` : ''}
+          ${room.includePrimer ? `<div class="room-detail-item">
+            <label>Primer Coats</label>
+            <input type="number" value="${room.primerCoats}" min="1" max="3" onchange="updateRoom('${id}','primerCoats',this.value)">
+          </div>` : ''}
+          ${room.includeTrim ? `<div class="room-detail-item">
+            <label>Trim Coats</label>
+            <input type="number" value="${room.trimCoats}" min="1" max="5" onchange="updateRoom('${id}','trimCoats',this.value)">
+          </div>` : ''}
+          ${room.paintDoors ? `<div class="room-detail-item">
+            <label>Extra Doors</label>
+            <input type="number" value="${room.extraDoors}" min="0" onchange="updateRoom('${id}','extraDoors',this.value)">
+          </div>
+          <div class="room-detail-item">
+            <label>Extra Win</label>
+            <input type="number" value="${room.extraWindows}" min="0" onchange="updateRoom('${id}','extraWindows',this.value)">
+          </div>
+          <label class="room-chip ${room.primeDoors ? 'active' : ''}" style="padding:6px 10px;">
+            <input type="checkbox" ${room.primeDoors ? 'checked' : ''} onchange="updateRoom('${id}','primeDoors',this.checked)">
+            Prime Doors
+          </label>` : ''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 function updateRoom(id, field, val) {
@@ -2301,6 +2359,10 @@ function recalc() {
 
   if (priceMode === 'sqft') {
     total = totalSqft * rate;
+    // Primer adds 60% of a single coat cost (prep surcharge)
+    if (totalPrimerSqft > 0) {
+      total += totalPrimerSqft * rate * 0.60;
+    }
   } else {
     total = rate;
   }
